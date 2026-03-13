@@ -4,8 +4,21 @@ Here's our first attempt at using data to create a table:
 """
 
 import streamlit as st
-import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-df = pd.DataFrame({"first column": [1, 2, 3, 4], "second column": [10, 20, 30, 40]})
+x_values = np.linspace(0, 2 * np.pi, 100)
+sin_y_values = np.sin(x_values)
+cos_y_values = np.cos(x_values)
+fig, ax = plt.subplots()
 
-st.write(df)
+ax.plot(x_values, sin_y_values, color="red")
+ax.plot(x_values, cos_y_values, color="blue")
+ax.axhline(y=0, linestyle="--")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+fig.tight_layout()
+
+st.markdown(":red[f(x) = sin x]")
+st.markdown(":blue[f(x) = cos x]")
+st.pyplot(fig)
