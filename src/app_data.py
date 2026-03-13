@@ -8,7 +8,7 @@ fig, ax = plt.subplots()
 
 ax.plot(x_values, sin_y_values, color="red", label="sin x")
 ax.plot(x_values, cos_y_values, color="blue", label="cos x")
-ax.axhline(y=0, linestyle="--")
+ax.axhline(y=0, linestyle="--", color="green")
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 fig.legend()
