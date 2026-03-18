@@ -1,3 +1,9 @@
 {
-    "cSpell.enabled": false
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.defaultColorDecorators": "never",
+        "editor.formatOnType": true,
+        "editor.wordBasedSuggestions": "off",
+    },
+    "python.analysis.typeCheckingMode": "standard"
 }

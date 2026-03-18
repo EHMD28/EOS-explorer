@@ -2,30 +2,45 @@
 This file in the entry point of the application.
 """
 
-import streamlit as st
-from app_data import fig
-import pandas as pd
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 import numpy as np
+import math
+import streamlit as st
 
 
-def f(x):
-    return x**2
+def f_sin(
+    amplitude: float,
+    angular_frequency: float,
+    phase: float,
+    interval: tuple[float, float],
+) -> tuple[list[float], list[float]]:
+    start, end = interval
+    t_values = np.linspace(start, end, num=200)
+    A = amplitude
+    omega = angular_frequency
+    phi = phase
+    y_values = [A * math.sin(omega * t - phi) for t in t_values]
+    return (t_values.tolist(), y_values)
+
+
+def generate_plot(x_values: list[float], y_values: list[float]) -> Figure:
+    fig, ax = plt.subplots()
+    ax.plot(x_values, y_values)
+    ax.set_xlabel("t")
+    ax.set_ylabel("y")
+    return fig
 
 
 def main():
-    st.latex(r"f(x) = \sin(x)")
-    st.latex(r"g(x) = \cos(x)")
-    st.pyplot(fig)
-
-    x_values = np.linspace(0, 20)
-    y_values = np.sin(x_values)
-    df = pd.DataFrame(
-        {
-            "y": y_values,  #
-        }
+    amplitude = 1.0
+    angular_frequency = 1.0
+    phase = 0
+    t_values, y_values = f_sin(
+        amplitude, angular_frequency, phase, interval=(0, 2 * np.pi)
     )
-    st.text("Hello, World")
-    st.line_chart(df)
+    fig = generate_plot(t_values, y_values)
+    st.pyplot(fig)
 
 
 if __name__ == "__main__":
