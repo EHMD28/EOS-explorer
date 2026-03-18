@@ -26,5 +26,5 @@ Using `uv`.
 uv venv
 uv pip install -r pyproject.toml
 source .venv/bin/activate
-streamlit run
+streamlit run src/app.py
 ```
