@@ -29,14 +29,12 @@ def get_sin_wave_points(
 def get_baseline_sin_wave_points(
     interval: tuple[float, float],
 ) -> tuple[list[float], list[float]]:
-    start, end = interval
-    t_values, y_values = get_sin_wave_points(
-        amplitude=1.0, angular_frequency=1.0, phase=0, interval=(start, end)
+    return get_sin_wave_points(
+        amplitude=1.0, angular_frequency=1.0, phase=0, interval=interval
     )
-    return (t_values, y_values)
 
 
-def generate_sin_plot(
+def get_sin_plot(
     t_values: list[float],
     y_values: list[float],
     interval: tuple[float, float],
@@ -46,7 +44,8 @@ def generate_sin_plot(
     if show_baseline:
         b_xs, b_ys = get_baseline_sin_wave_points(interval)
         ax.plot(b_xs, b_ys, color="blue", label="Baseline")
-    ax.plot(t_values, y_values, color="red")
+    ax.plot(t_values, y_values, color="red", label="_with_parameters")
+    ax.set_title("Sine Wave")
     ax.set_xlabel("t")
     ax.set_ylabel("y")
     ax.legend()
@@ -64,11 +63,58 @@ def get_sine_wave_figure_with_parameters():
     t_values, y_values = get_sin_wave_points(
         amplitude, angular_frequency, phase, interval=(0, 2 * np.pi)
     )
-    fig = generate_sin_plot(
+    fig = get_sin_plot(
         t_values,
         y_values,
         interval=(start, end),
-        show_baseline=st.checkbox("Show Baseline"),
+        show_baseline=st.checkbox("Show Baseline", value=True),
+    )
+    return fig
+
+
+def get_parabola_points(
+    a: float, b: float, c: float, interval: tuple[float, float]
+) -> tuple[list[float], list[float]]:
+    start, end = interval
+    points = np.linspace(start, end, 200)
+    y_values = [a * x**2 + b * x + c for x in points]
+    return (points.tolist(), y_values)
+
+
+def get_baseline_parabola_points(interval: tuple[float, float]):
+    return get_parabola_points(a=1, b=0, c=0, interval=interval)
+
+
+def get_parabola_plot(
+    x_values: list[float],
+    y_values: list[float],
+    interval: tuple[float, float],
+    show_baseline: bool,
+) -> Figure:
+    fig, ax = plt.subplots()
+    if show_baseline:
+        b_xs, b_ys = get_baseline_parabola_points(interval)
+        ax.plot(b_xs, b_ys, color="blue")
+    ax.plot(x_values, y_values, color="red")
+    ax.set_title("Parabola")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    return fig
+
+
+def get_parabola_figure_with_parmaters():
+    a = st.slider("a", value=1)
+    b = st.slider("b")
+    c = st.slider("c")
+    start = -10
+    end = 10
+    interval = (start, end)
+    x_values, y_values = get_parabola_points(a, b, c, interval)
+    fig = get_parabola_plot(
+        x_values,
+        y_values,
+        interval,
+        show_baseline=st.checkbox("Show Baseline", value=True),
     )
     return fig
 
@@ -81,7 +127,7 @@ def main():
     if option == "sine wave":
         fig = get_sine_wave_figure_with_parameters()
     elif option == "parabola":
-        ...
+        fig = get_parabola_figure_with_parmaters()
     st.pyplot(fig)
 
 
