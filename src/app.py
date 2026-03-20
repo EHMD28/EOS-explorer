@@ -58,15 +58,16 @@ def get_sine_wave_figure_with_parameters():
     angular_frequency = st.slider("ω", value=1)
     phase = st.slider("φ", value=0)
     st.write(amplitude, angular_frequency, phase)
-    start = 0
-    end = 2 * np.pi
+    start = st.number_input(label="Interval Start", value=0.0, format="%0.5f")
+    end = st.number_input(label="Interval End", value=2 * np.pi, format="%0.5f")
+    interval = (start, end)
     t_values, y_values = get_sin_wave_points(
-        amplitude, angular_frequency, phase, interval=(0, 2 * np.pi)
+        amplitude, angular_frequency, phase, interval
     )
     fig = get_sin_plot(
         t_values,
         y_values,
-        interval=(start, end),
+        interval,
         show_baseline=st.checkbox("Show Baseline", value=True),
     )
     return fig
@@ -106,8 +107,8 @@ def get_parabola_figure_with_parmaters():
     a = st.slider("a", value=1)
     b = st.slider("b")
     c = st.slider("c")
-    start = -10
-    end = 10
+    start = st.number_input(label="Interval Start", value=-10.0, format="%0.5f")
+    end = st.number_input(label="Interval End", value=10.0, format="%0.5f")
     interval = (start, end)
     x_values, y_values = get_parabola_points(a, b, c, interval)
     fig = get_parabola_plot(
