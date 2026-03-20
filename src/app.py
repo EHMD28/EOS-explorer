@@ -11,6 +11,16 @@ import math
 import streamlit as st
 
 
+def show_sine_wave_info():
+    st.latex(r"y(t) = A \sin(\omega t - \phi)")
+    st.markdown(r"$A$ = ampltidue")
+    st.markdown(r"$\omega$ = angular frequency")
+    st.markdown(r"$\phi$ = phase shift")
+    st.markdown(
+        r"The baseline sine wave function is $y(t) = \sin(t)$. See [this page](https://en.wikipedia.org/wiki/Sine_wave) for more information."
+    )
+
+
 def get_sin_wave_points(
     amplitude: float,
     angular_frequency: float,
@@ -26,6 +36,7 @@ def get_sin_wave_points(
     return (t_values.tolist(), y_values)
 
 
+@st.cache_data
 def get_baseline_sin_wave_points(
     interval: tuple[float, float],
 ) -> tuple[list[float], list[float]]:
@@ -73,6 +84,11 @@ def get_sine_wave_figure_with_parameters():
     return fig
 
 
+def show_parabola_info():
+    st.latex(r"y = ax^2 + bx + c")
+    st.markdown("The baseline parabola function is $y = x^2$")
+
+
 def get_parabola_points(
     a: float, b: float, c: float, interval: tuple[float, float]
 ) -> tuple[list[float], list[float]]:
@@ -82,6 +98,7 @@ def get_parabola_points(
     return (points.tolist(), y_values)
 
 
+@st.cache_data
 def get_baseline_parabola_points(interval: tuple[float, float]):
     return get_parabola_points(a=1, b=0, c=0, interval=interval)
 
@@ -100,6 +117,7 @@ def get_parabola_plot(
     ax.set_title("Parabola")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
+    ax.legend()
     return fig
 
 
@@ -126,8 +144,10 @@ def main():
     )
     fig = None
     if option == "sine wave":
+        show_sine_wave_info()
         fig = get_sine_wave_figure_with_parameters()
     elif option == "parabola":
+        show_parabola_info()
         fig = get_parabola_figure_with_parmaters()
     st.pyplot(fig)
 
