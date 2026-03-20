@@ -7,14 +7,12 @@
 
 # User Interface
 
-- [ ] Plot a function using Matplotlib
+- [x] Plot a function using Matplotlib
 - [ ] Graph sine wave and parabola
     - [ ] Allow the user to choose between the two
     - [ ] Adjust the paramters for each function
-        - sin: A*sin(Bx - C) + D
-            - Report wavelength, frequency, amplitude, etc.
-        - parabola: Ax^2 + Bx + C
-            - Report vertex
+        - [x] sine wave: A sin(Bx - C)
+        - [ ] parabola: Ax^2 + Bx + C
 - [ ] Add tunable, polytropic EOS to UI.
 - [ ] Plot mass-radius curve
 - [ ] Plot EOS graph
