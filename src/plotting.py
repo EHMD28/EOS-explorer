@@ -60,11 +60,11 @@ def load_mr_curve_from_df(path: Path) -> tuple[list[float], list[float]]:
 
 
 def generate_log_fig(
-    title: str,
-    x_label: str,
-    y_label: str,
     xs: list[float],
     ys: list[float],
+    title: str = "",
+    x_label: str = "",
+    y_label: str = "",
     is_scatter: bool = False,
 ) -> Figure:
     fig = plt.figure()

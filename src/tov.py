@@ -1,4 +1,4 @@
-from numpy import ndarray
+from numpy import float64, ndarray
 from scipy.constants import pi
 from scipy.integrate import solve_ivp
 
@@ -8,9 +8,6 @@ from eos import eos_eps_prime, p_prime
 def tov_rhs(r: float, state: tuple[float, float]) -> tuple[float, float]:
     # EVERYTHING in this function should be dimensionless
     p, m = state
-    print(f"DEBUG - {p=}")
-    if p <= 0:
-        return (0, m)
     if m <= 0:
         raise ValueError("Mass is too small")
     eps = eos_eps_prime(p)
@@ -52,7 +49,9 @@ def solve_tov(p_c: float) -> tuple[float, float]:
     return (radius, mass)
 
 
-def generate_mr_curve(p_c_range: list[float]) -> tuple[list[float], list[float]]:
+def generate_mr_curve(
+    p_c_range: list[float],
+) -> tuple[list[float], list[float]]:
     radii: list[float] = []
     masses: list[float] = []
     for p_c in p_c_range:
