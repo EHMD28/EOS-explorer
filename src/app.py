@@ -27,6 +27,16 @@ def plot_tabulated_eos():
     st.pyplot(eos_fig)
 
 
+def plot_lin_tabulated_eos():
+    densities, pressures = EOS_DATA
+    fig, ax = plt.subplots()
+    ax.set_title("Linearly-Spaced EOS")
+    ax.set_xlabel("Energy Density [MeV/fm^3]")
+    ax.set_ylabel("Pressure [MeV/fm^3]")
+    ax.scatter(densities, pressures)
+    st.pyplot(fig)
+
+
 def plot_tabulated_mr():
     radii, masses = MR_DATA
     mr_fig = generate_log_fig(
@@ -60,10 +70,10 @@ def plot_solver_mr():
 
 
 def main():
-    # plot_solver_mr()
     plot_tabulated_mr()
     plot_lin_tabulated_mr()
     plot_tabulated_eos()
+    plot_lin_tabulated_eos()
 
 
 if __name__ == "__main__":
