@@ -1,28 +1,36 @@
-from pathlib import Path
 import numpy as np
-import pandas as pd
 
-from app_constants import E_0, EOS_DATA
+from app_constants import EOS_DATA, ScalingConstants
 
 
 @np.vectorize
 def p_prime(p: float) -> float:
-    return p / E_0
+    return p / ScalingConstants.E_0
 
 
 @np.vectorize
 def eps_prime(eps: float) -> float:
-    return eps / E_0
+    return eps / ScalingConstants.E_0
 
 
 @np.vectorize
-def p_nu(p):
-    return E_0 * p
+def p_nu(p_p):
+    return ScalingConstants.E_0 * p_p
 
 
 @np.vectorize
-def eps_nu(eps):
-    return E_0 * eps
+def eps_nu(eps_p):
+    return ScalingConstants.E_0 * eps_p
+
+
+@np.vectorize
+def r_nu(r_p: float) -> float:
+    return ScalingConstants.A * r_p
+
+
+@np.vectorize
+def m_nu(m_p: float) -> float:
+    return ScalingConstants.B * m_p
 
 
 def eos_eps(p: float) -> float:
@@ -33,6 +41,7 @@ def eos_eps(p: float) -> float:
 
 def eos_eps_prime(p: float):
     densities, pressures = EOS_DATA
+    densities = [eps * ScalingConstants.MEV_PER_FM3_TO_SM_PER_KM_3 for eps in densities]
     densities, pressures = (eps_prime(densities), p_prime(pressures))
     eps = np.interp(p, pressures, densities)
     return eps
