@@ -4,6 +4,9 @@
         "editor.defaultColorDecorators": "never",
         "editor.formatOnType": true,
         "editor.wordBasedSuggestions": "off",
+        "editor.rulers": [
+            80
+        ]
     },
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.autoImportCompletions": true
