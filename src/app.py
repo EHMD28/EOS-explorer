@@ -11,7 +11,7 @@ from plotting import generate_log_fig
 
 import streamlit as st
 
-from tov import generate_mr_curve
+from ui import draw_ui
 
 
 def plot_tabulated_eos():
@@ -62,18 +62,24 @@ def plot_lin_tabulated_mr():
     st.pyplot(lin_mr_fig)
 
 
-def plot_solver_mr():
-    solver_curve = generate_mr_curve(np.logspace(-15, 1).tolist())
-    solver_radii, solver_masses = solver_curve
-    solver_fig = generate_log_fig(solver_radii, solver_masses, is_scatter=True)
-    st.pyplot(solver_fig)
+# def plot_solver_mr():
+#     solver_curve = generate_mr_curve(np.logspace(-15, 1).tolist())
+#     solver_radii, solver_masses = solver_curve
+#     solver_fig = generate_log_fig(solver_radii, solver_masses, is_scatter=True)
+#     st.pyplot(solver_fig)
+
+
+def configure_streamlit():
+    st.set_page_config(page_title="EOS Explorer")
 
 
 def main():
-    plot_tabulated_mr()
-    plot_lin_tabulated_mr()
-    plot_tabulated_eos()
-    plot_lin_tabulated_eos()
+    configure_streamlit()
+    draw_ui()
+    # plot_tabulated_mr()
+    # plot_lin_tabulated_mr()
+    # plot_tabulated_eos()
+    # plot_lin_tabulated_eos()
 
 
 if __name__ == "__main__":
