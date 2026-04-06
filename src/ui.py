@@ -1,11 +1,12 @@
-from typing import Literal
 import typing
+from typing import Literal
 
 import numpy as np
 import streamlit as st
 
 from eos.polytropic import eos_p_vec as polytropic_eos_p
 from plotting import generate_log_fig
+from tov import solve_dimensionless_tov
 
 EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
 
@@ -92,8 +93,10 @@ def draw_polytropic_eos_plot(
     st.pyplot(fig)
 
 
-def draw_and_get_eos_data_upload():
+def draw_and_get_eos_data_from_upload():
     file = st.file_uploader(label="Choose a data file", type=["txt", "csv", "tsv"])
+    data = ...
+    return data
 
 
 def draw_ui_for_polytropic_eos():
@@ -102,7 +105,13 @@ def draw_ui_for_polytropic_eos():
     with col_one:
         kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
         eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
-        draw_and_get_eos_data_upload()
+        eos_data = draw_and_get_eos_data_from_upload()
+        # TEMP
+        solve_dimensionless_tov(
+            p_c=0,
+            # TODO: fix lambda expression
+            eos_eps_fn=lambda p: p,
+        )
     with col_two:
         draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
 
