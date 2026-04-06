@@ -4,9 +4,7 @@ import typing
 import numpy as np
 import streamlit as st
 
-from eos import polytropic
 from eos.polytropic import eos_p_vec as polytropic_eos_p
-from eos.polytropic import eos_eps_vec as polytropic_eos_eps
 from plotting import generate_log_fig
 
 EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
@@ -107,6 +105,54 @@ def draw_ui_for_polytropic_eos():
         draw_and_get_eos_data_upload()
     with col_two:
         draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
+
+
+# def plot_tabulated_eos():
+#     densities, pressures = EOS_DATA
+#     eos_fig = generate_log_fig(
+#         densities,
+#         pressures,
+#         title="Tabulated EoS",
+#         x_label="Energy Density [MeV/fm^3]",
+#         y_label="Pressure [MeV/fm^3]",
+#         is_scatter=True,
+#     )
+#     st.pyplot(eos_fig)
+
+
+# def plot_lin_tabulated_eos():
+#     densities, pressures = EOS_DATA
+#     fig, ax = plt.subplots()
+#     ax.set_title("Linearly-Spaced EOS")
+#     ax.set_xlabel("Energy Density [MeV/fm^3]")
+#     ax.set_ylabel("Pressure [MeV/fm^3]")
+#     ax.scatter(densities, pressures)
+#     st.pyplot(fig)
+
+
+# def plot_tabulated_mr():
+#     radii, masses = MR_DATA
+#     mr_fig = generate_log_fig(
+#         radii,
+#         masses,
+#         title="Tabulated Mass-Radius Curve",
+#         x_label="Radius [km]",
+#         y_label="Mass [M☉]",
+#         is_scatter=True,
+#     )
+#     mr_ax = mr_fig.axes[0]
+#     mr_ax.plot(radii, masses, color="orange")
+#     st.pyplot(mr_fig)
+
+
+# def plot_lin_tabulated_mr():
+#     radii, masses = MR_DATA
+#     lin_mr_fig, lin_mr_ax = plt.subplots()
+#     lin_mr_ax.scatter(radii, masses)
+#     lin_mr_ax.set_title("Linearly-Spaced Mass-Radius Curve")
+#     lin_mr_ax.set_xlabel("Radius [km]")
+#     lin_mr_ax.set_ylabel("Mass [M☉]")
+#     st.pyplot(lin_mr_fig)
 
 
 def draw_ui_for_soc_eos():
