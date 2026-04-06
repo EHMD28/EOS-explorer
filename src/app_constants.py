@@ -1,8 +1,8 @@
 from pathlib import Path
-from plotting import load_eos_from_file, load_mr_curve_from_df
-
 
 import numpy as np
+
+from plotting import load_eos_from_file, load_mr_curve_from_df
 
 
 class AppConstants:
@@ -17,7 +17,7 @@ MR_DATA = load_mr_curve_from_df(MRL_FILE_PATH)
 
 
 class ScalingConstants:
-    E_0 = 1e-2
+    E_0 = 100
     G_NU = 1.4766  # km/solar-mass
     A = 1 / np.sqrt(G_NU * E_0)
     B = 1 / np.sqrt(G_NU**3 * E_0)

@@ -4,7 +4,8 @@ from typing import Literal
 import numpy as np
 import streamlit as st
 
-from eos.polytropic import eos_p_vec as polytropic_eos_p
+from eos.polytropic import eos_eps as polytropic_eos_eps
+from eos.polytropic import eos_p as polytropic_eos_p
 from plotting import generate_log_fig
 from tov import solve_dimensionless_tov
 
@@ -72,7 +73,7 @@ def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=10,
-        value=(1, 5),
+        value=(1, 3),
     )
     return (eps_start, eps_end)
 
@@ -106,12 +107,11 @@ def draw_ui_for_polytropic_eos():
         kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
         eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
         eos_data = draw_and_get_eos_data_from_upload()
-        # TEMP
-        solve_dimensionless_tov(
-            p_c=0,
-            # TODO: fix lambda expression
-            eos_eps_fn=lambda p: p,
+        r, m = solve_dimensionless_tov(
+            p_c=150,
+            eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma),
         )
+        st.text(f"Radius: {r} | Mass: {m}")
     with col_two:
         draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
 

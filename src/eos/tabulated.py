@@ -1,13 +1,13 @@
 import numpy as np
 
 from app_constants import EOS_DATA, ScalingConstants
-from eos.dimensionless import eps_prime, p_prime
+from eos.dimensionless import energy_density_prime, pressure_prime
 
 
 def get_dimensionless_data():
     densities, pressures = EOS_DATA
     densities = [eps * ScalingConstants.MEV_PER_FM3_TO_SM_PER_KM_3 for eps in densities]
-    densities, pressures = (eps_prime(densities), p_prime(pressures))
+    densities, pressures = (energy_density_prime(densities), pressure_prime(pressures))
     return (densities, pressures)
 
 

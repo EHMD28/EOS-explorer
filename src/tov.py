@@ -1,9 +1,15 @@
 from typing import Callable
 
-from numpy import ndarray, pi
+from numpy import pi
 from scipy.integrate import solve_ivp
 
-from eos.dimensionless import eps_prime, p_prime
+from eos.dimensionless import (
+    energy_density_prime,
+    mass_nu,
+    pressure_nu,
+    pressure_prime,
+    radius_nu,
+)
 
 
 def dimensionless_tov_rhs(r, state, eos_eps_p_fn):
@@ -20,7 +26,7 @@ def dimensionless_tov_rhs(r, state, eos_eps_p_fn):
     return (dp_dr, dm_dr)
 
 
-def surface_event(r, state):
+def surface_event(r, state: tuple[float, float], eos_eps_fn):
     p, _ = state
     return p
 
@@ -29,27 +35,34 @@ surface_event.terminal = True  # pyright: ignore[reportFunctionMemberAccess]
 surface_event.direction = -1  # pyright: ignore[reportFunctionMemberAccess]
 
 
-def solve_dimensionless_tov(p_c: float, eos_eps_fn: Callable[[float], float]):
-    def eos_eps_prime(p: float) -> float:
-        # TODO: Check dimensionality of this.
-        return eps_prime(eos_eps_fn(p))
+def solve_dimensionless_tov(
+    p_c: float, eos_eps_fn: Callable[[float], float]
+) -> tuple[float, float]:
+    def eos_eps_prime(p_p: float) -> float:
+        p_nu = pressure_nu(p_p)
+        eps_nu = eos_eps_fn(p_nu)
+        return energy_density_prime(eps_nu)
 
-    p_c_p = p_prime(p_c)
-    # TODO: Fill this in with correct value.
-    eps_p = eos_eps_prime(0.0)
-    r_0_p = 1e-5
+    p_c_p = pressure_prime(p_c)
+    eps_p = eos_eps_prime(p_c_p)
+    r_0_p = 1e-2
     m_0_p = (4 * pi / 3) * r_0_p**3 * eps_p
     solutions = solve_ivp(
         fun=dimensionless_tov_rhs,
-        t_span=(0, 50),  # TODO: Check this
+        # solve_ivp() should terminate before reaching the end of the input range.
+        t_span=(r_0_p, 50),  # TODO: Tune range
         y0=(p_c_p, m_0_p),
         events=surface_event,
         args=(eos_eps_prime,),
     )
-    radius_surface_events: ndarray = solutions.t_events[0]
-    p_m_surface_events: list[tuple[float, float]] = solutions.y_events[0]
-    if radius_surface_events.size == 0:
-        raise ValueError("No events registered")
-    radius = radius_surface_events[0]
-    mass = p_m_surface_events[0][1]
-    return (radius, mass)
+    # radius_surface_events: ndarray = solutions.t_events[0]
+    # p_m_surface_events: list[tuple[float, float]] = solutions.y_events[0]
+    # if radius_surface_events.size == 0:
+    #     raise ValueError("No events registered")
+    # r_p = radius_surface_events[0]
+    # m_p = p_m_surface_events[0][1]
+    r_p = max(solutions.t)
+    m_p = max(solutions.y[1])
+    r_nu = radius_nu(r_p)
+    m_nu = mass_nu(m_p)
+    return (r_nu, m_nu)
