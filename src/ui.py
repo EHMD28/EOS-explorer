@@ -33,7 +33,7 @@ def draw_info_for_polytropic_eos():
     )
     st.markdown(r"$\gamma$ = Polytropic Index (dimensionless) ")
     st.text(
-        "Note that, using the rules of logarithms, the equation can be rearranged to the follow form."
+        "Note that, using the rules of logarithms, the equation can be rearranged to the following form."
     )
     st.latex(r"\log(P) = \gamma \log(\varepsilon) + \log(K)")
     st.markdown(
@@ -109,7 +109,8 @@ def draw_ui_for_polytropic_eos():
         draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
 
 
-def draw_ui_for_soc_eos(): ...
+def draw_ui_for_soc_eos():
+    st.text("Work In Progress")
 
 
 def draw_ui():

@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from streamlit.cursor import T
 
-from app_constants import EOS_DATA, MR_DATA
+from app_constants import EOS_DATA, MR_DATA, AppConstants
 from plotting import generate_log_fig
 
 import streamlit as st
@@ -62,15 +62,10 @@ def plot_lin_tabulated_mr():
     st.pyplot(lin_mr_fig)
 
 
-# def plot_solver_mr():
-#     solver_curve = generate_mr_curve(np.logspace(-15, 1).tolist())
-#     solver_radii, solver_masses = solver_curve
-#     solver_fig = generate_log_fig(solver_radii, solver_masses, is_scatter=True)
-#     st.pyplot(solver_fig)
-
-
 def configure_streamlit():
-    st.set_page_config(page_title="EOS Explorer", layout="wide")
+    st.set_page_config(
+        page_title="EOS Explorer", page_icon=AppConstants.FAVICON_PATH, layout="wide"
+    )
 
 
 def main():

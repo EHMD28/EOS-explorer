@@ -5,6 +5,10 @@ from plotting import load_eos_from_file, load_mr_curve_from_df
 import numpy as np
 
 
+class AppConstants:
+    FAVICON_PATH = Path("assets/favicon.png")
+
+
 EOS_FILE_PATH = Path("src/data/eos_68.txt")
 MRL_FILE_PATH = Path("src/data/mrl_eos_68.txt")
 
