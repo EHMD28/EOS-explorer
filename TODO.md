@@ -13,7 +13,7 @@
     - [x] Adjust the paramters for each function
         - [x] sine wave: A sin(Bx - C)
         - [x] parabola: Ax^2 + Bx + C
-- [ ] Add tunable, polytropic EOS to UI.
+- [x] Add tunable, polytropic EOS to UI.
 - [ ] Plot mass-radius curve
 - [ ] Plot EOS graph
 

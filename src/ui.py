@@ -24,7 +24,7 @@ def draw_and_get_eos_dropdown() -> EOS_OPTIONS:
 
 
 def draw_info_for_polytropic_eos():
-    st.markdown("# Equation of State")
+    st.markdown("# Polytropic Equation of State")
     st.latex(r"P(\varepsilon) = K\varepsilon^\gamma")
     st.markdown(r"$P(\varepsilon)$ = Pressure in _MeV/fm^3_")
     st.markdown(r"$\varepsilon$ = Energy density in _MeV/fm^3_")
@@ -94,11 +94,19 @@ def draw_polytropic_eos_plot(
     st.pyplot(fig)
 
 
+def draw_and_get_eos_data_upload():
+    file = st.file_uploader(label="Choose a data file", type=["txt", "csv", "tsv"])
+
+
 def draw_ui_for_polytropic_eos():
     draw_info_for_polytropic_eos()
-    kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
-    eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
-    draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
+    col_one, col_two = st.columns(spec=[0.4, 0.6])
+    with col_one:
+        kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
+        eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
+        draw_and_get_eos_data_upload()
+    with col_two:
+        draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
 
 
 def draw_ui_for_soc_eos(): ...

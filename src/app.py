@@ -70,7 +70,7 @@ def plot_lin_tabulated_mr():
 
 
 def configure_streamlit():
-    st.set_page_config(page_title="EOS Explorer")
+    st.set_page_config(page_title="EOS Explorer", layout="wide")
 
 
 def main():
