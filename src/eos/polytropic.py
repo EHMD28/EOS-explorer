@@ -27,6 +27,8 @@ def eos_eps(p: float, kappa: float, gamma: float) -> float:
     Calculates the energy density [MeV/fm^3] as a function of pressure
     [MeV/fm^3] using a polytropic equation of state.
     """
+    if p <= 0:
+        return 0.0
     return (p / kappa) ** (1 / gamma)
 
 

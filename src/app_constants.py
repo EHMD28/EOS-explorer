@@ -2,8 +2,6 @@ from pathlib import Path
 
 import numpy as np
 
-from plotting import load_eos_from_file, load_mr_curve_from_df
-
 
 class AppConstants:
     FAVICON_PATH = Path("assets/favicon.png")
@@ -12,8 +10,8 @@ class AppConstants:
 EOS_FILE_PATH = Path("src/data/eos_68.txt")
 MRL_FILE_PATH = Path("src/data/mrl_eos_68.txt")
 
-EOS_DATA = load_eos_from_file(EOS_FILE_PATH)
-MR_DATA = load_mr_curve_from_df(MRL_FILE_PATH)
+# EOS_DATA = load_eos_from_file(EOS_FILE_PATH)
+# MR_DATA = load_mr_curve_from_df(MRL_FILE_PATH)
 
 
 class ScalingConstants:

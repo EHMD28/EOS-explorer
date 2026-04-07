@@ -2,12 +2,14 @@ import typing
 from typing import Literal
 
 import numpy as np
+import pandas as pd
+import pandas
 import streamlit as st
 
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
 from plotting import generate_lin_fig, generate_log_fig
-from tov import generate_mass_radius_curve, solve_dimensionless_tov
+from tov import generate_mass_radius_curve
 
 EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
 
@@ -46,20 +48,20 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
     Returns a tuple containing the chosen values of the parameters in the form
     (kappa, gamma).
     """
-    st.markdown("# Parameters")
+    st.markdown("# Parameters (not currently accurate)")
     kappa = st.number_input(
         label="K - Proportionality Constant",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
-        value=1.0,
+        value=0.10221009841618742 * 5,  # TODO: Change to a reasonable default
     )
     gamma = st.number_input(
         label="𝛾 - Stiffness Value",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-1.0,
         max_value=10.0,
-        value=1.0,
+        value=1.4952530967691224 * 1,  # TODO: Change to a reasonable default
     )
     return (kappa, gamma)
 
@@ -69,17 +71,21 @@ def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
     Returns a tuple containing the chosen range of energy density magnitude values.
     """
     eps_start, eps_end = st.slider(
-        label=r"$\varepsilon$ Magnitude Range - Evaluation Range: [$10^{start}$, $10^{end}$)",
+        label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=10,
-        value=(1, 3),
+        value=(-15, 1),
     )
     return (eps_start, eps_end)
 
 
 def draw_polytropic_eos_plot(
-    kappa: float, gamma: float, eps_magnitudes: tuple[float, float]
+    kappa: float,
+    gamma: float,
+    eps_magnitudes: tuple[float, float],
+    densities: list[float] | None = None,
+    pressures: list[float] | None = None,
 ):
     eps_start, eps_end = eps_magnitudes
     eps_range = np.logspace(eps_start, eps_end, num=200)
@@ -91,17 +97,36 @@ def draw_polytropic_eos_plot(
         x_label="Energy Density [MeV/fm^3]",
         y_label="Pressure [MeV/fm^3]",
     )
+    if densities is not None and pressures is not None:
+        ax = fig.axes[0]
+        ax.scatter(densities, pressures, color="orange")
     st.pyplot(fig)
 
 
-def draw_and_get_eos_data_from_upload():
-    file = st.file_uploader(label="Choose a data file", type=["txt", "csv", "tsv"])
-    data = ...
-    return data
+def draw_and_get_eos_data_from_upload() -> tuple[list[float], list[float]] | None:
+    uploaded_file = st.file_uploader(
+        label="Choose a data file", type=["txt", "csv", "tsv"]
+    )
+    # TODO: Move to appropriate file
+    if uploaded_file is not None:
+        df = pd.read_csv(
+            uploaded_file, sep=None, header="infer", comment="#", engine="python"
+        )
+        header = df.columns.values.tolist()
+        if "p" in header and "e" in header:
+            pressures = df["p"]
+            densities = df["e"]
+            return (densities.tolist(), pressures.tolist())
+    return None
 
 
-def plot_mass_radius_curve(radii: list[float], masses: list[float]):
-    fig = generate_lin_fig(
+def plot_mass_radius_curve(
+    radii: list[float],
+    masses: list[float],
+    tabulated_radii: list[float] | None = None,
+    tabulated_masses: list[float] | None = None,
+):
+    fig = generate_log_fig(
         radii,
         masses,
         title="Mass-Radius Curve",
@@ -109,6 +134,9 @@ def plot_mass_radius_curve(radii: list[float], masses: list[float]):
         y_label="Masses [M_sun]",
         is_scatter=True,
     )
+    if tabulated_radii is not None and tabulated_masses is not None:
+        ax = fig.axes[0]
+        ax.plot(tabulated_radii, tabulated_masses)
     st.pyplot(fig)
 
 
@@ -118,15 +146,36 @@ def draw_ui_for_polytropic_eos():
     with col_one:
         kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
         eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
-        eos_data = draw_and_get_eos_data_from_upload()
+        data = draw_and_get_eos_data_from_upload()
+        densities, pressures = data if data is not None else (None, None)
     with col_two:
-        draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
+        draw_polytropic_eos_plot(
+            kappa,
+            gamma,
+            eps_magnitudes=(eps_start, eps_end),
+            densities=densities,
+            pressures=pressures,
+        )
     # TODO: Add sliders for pressure range
     radii, masses = generate_mass_radius_curve(
-        p_c_magnitude_range=(1, 3),
+        p_c_magnitude_range=(-10, 0),
         eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma),
     )
-    plot_mass_radius_curve(radii, masses)
+    # TODO: Move to appropriate location
+    mrl_df = pd.read_csv(
+        "src/data/mrl_eos_68.txt",
+        sep=None,
+        header="infer",
+        comment="#",
+        engine="python",
+    )
+    mrl_header = mrl_df.columns.values.tolist()
+    if "m" in mrl_header and "r" in mrl_header:
+        tabulated_radii = mrl_df["r"].tolist()
+        tabulated_masses = mrl_df["m"].tolist()
+        plot_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
+    else:
+        plot_mass_radius_curve(radii, masses)
 
 
 # def plot_tabulated_eos():

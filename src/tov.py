@@ -56,10 +56,10 @@ def solve_dimensionless_tov(
         events=surface_event,
         args=(eos_eps_prime,),
     )
-    # print("SOLVER DEBUG")
-    # print(solutions.status)
-    # print(solutions.message)
-    # print(solutions.y[0][-10:])
+    print("SOLVER DEBUG" + "-" * 70)
+    print(solutions.status)
+    print(solutions.message)
+    print(f"Pressures: {solutions.y[0][-10:]}")
     radius_surface_events: np.ndarray = solutions.t_events[0]
     state_surface_events: list[tuple[float, float]] = solutions.y_events[0]
     if radius_surface_events.size == 0:
@@ -80,7 +80,10 @@ def generate_mass_radius_curve(
     radii = []
     masses = []
     for p_c in p_c_values:
-        radius, mass = solve_dimensionless_tov(p_c, eos_eps_fn)
-        radii.append(radius)
-        masses.append(mass)
+        try:
+            radius, mass = solve_dimensionless_tov(p_c, eos_eps_fn)
+            radii.append(radius)
+            masses.append(mass)
+        except ValueError as err:
+            print(f"DEBUG - Encountered error: {err}")
     return (radii, masses)
