@@ -9,9 +9,9 @@ This project using [SciPy](https://scipy.org/) and [Numpy](https://numpy.org/) f
 
 ## Running
 
-If you would like to view the application locally, run the following command(s) in your terminal. You must have Python version 3+ to run this.
+If you would like to view the application locally, run the following command(s) in your terminal from the root directory of this repository. You must have Python version 3+ to run this. It's recommended to avoid installing depencies globally by using [virtual environments](https://docs.python.org/3/library/venv.html).
 
-Using `pip`.
+Using `python3`.
 
 ```bash
 python3 -m venv .venv # create a virtual environment for installing dependencies

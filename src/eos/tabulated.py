@@ -1,6 +1,4 @@
-from io import TextIOWrapper
 from pathlib import Path
-from typing import TextIO
 
 import pandas as pd
 
@@ -57,19 +55,3 @@ def load_mr_curve_from_df(path: Path) -> tuple[list[float], list[float]]:
     masses: pd.Series[float] = df["m"]
     radii: pd.Series[float] = df["r"]
     return (radii.tolist(), masses.tolist())
-
-
-# def get_dimensionless_data():
-#     densities, pressures = EOS_DATA
-#     densities = [eps * ScalingConstants.MEV_PER_FM3_TO_SM_PER_KM_3 for eps in densities]
-#     densities, pressures = (energy_density_prime(densities), pressure_prime(pressures))
-#     return (densities, pressures)
-
-
-# DIMENSIONLESS_DATA = get_dimensionless_data()
-
-
-# def eos_eps_prime(p: float):
-#     pressures, densities = DIMENSIONLESS_DATA
-#     eps = np.interp(p, pressures, densities)
-#     return eps

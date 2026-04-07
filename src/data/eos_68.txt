@@ -1,7 +1,7 @@
 ### name of eos: /1D/NS/Classical/APR 
 ### link: https://compose.obspm.fr/eos/68 
 ### Number density nb [fm-3] 	 Chemical potential mu [MeV] 	 Pressure p [MeV/fm3] 	 Energy density e [MeV/fm3] 
-n	mu	p	e
+n	mu	p	ex
 7.92405959867008e-15	0.931191807807985	1.8864781909828667e-22	7.37881919421599e-15
 2.50580766467172e-14	0.9311918717271044	1.2028751012380429e-21	2.333387609166273e-14
 7.92405959867008e-14	0.9311920006112557	7.669892586590564e-21	7.378820143659157e-14

@@ -3,12 +3,11 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-import pandas
 import streamlit as st
 
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
-from plotting import generate_lin_fig, generate_log_fig
+from plotting import generate_log_fig
 from tov import generate_mass_radius_curve
 
 EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
@@ -27,11 +26,11 @@ def draw_and_get_eos_dropdown() -> EOS_OPTIONS:
 
 def draw_info_for_polytropic_eos():
     st.markdown("# Polytropic Equation of State")
-    st.latex(r"P(\varepsilon) = K\varepsilon^\gamma")
-    st.markdown(r"$P(\varepsilon)$ = Pressure in _MeV/fm^3_")
-    st.markdown(r"$\varepsilon$ = Energy density in _MeV/fm^3_")
+    st.latex(r"P(\varepsilon) = K\varepsilon^\gamma.")
+    st.markdown(r"$P(\varepsilon)$ = Pressure in _MeV/fm^3_.")
+    st.markdown(r"$\varepsilon$ = Energy density in _MeV/fm^3_.")
     st.markdown(
-        r"$\Kappa$ = Proportionality Constant. The dimension of $K$ cancels out the dimension of $\varepsilon^\gamma$"
+        r"$\Kappa$ = Proportionality Constant. The dimension of $K$ cancels out the dimension of $\varepsilon^\gamma$."
     )
     st.markdown(r"$\gamma$ = Polytropic Index (dimensionless) ")
     st.text(
@@ -54,7 +53,8 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
         # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
-        value=0.10221009841618742 * 5,  # TODO: Change to a reasonable default
+        value=1.2,  # TODO: Change to a reasonable default
+        format="%0.10f",
     )
     gamma = st.number_input(
         label="𝛾 - Stiffness Value",
@@ -62,6 +62,7 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
         min_value=-1.0,
         max_value=10.0,
         value=1.4952530967691224 * 1,  # TODO: Change to a reasonable default
+        format="%0.10f",
     )
     return (kappa, gamma)
 
@@ -136,7 +137,7 @@ def plot_mass_radius_curve(
     )
     if tabulated_radii is not None and tabulated_masses is not None:
         ax = fig.axes[0]
-        ax.plot(tabulated_radii, tabulated_masses)
+        ax.scatter(tabulated_radii, tabulated_masses)
     st.pyplot(fig)
 
 
@@ -158,72 +159,28 @@ def draw_ui_for_polytropic_eos():
         )
     # TODO: Add sliders for pressure range
     radii, masses = generate_mass_radius_curve(
-        p_c_magnitude_range=(-10, 0),
+        p_c_magnitude_range=(1, 5),
         eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma),
     )
     # TODO: Move to appropriate location
-    mrl_df = pd.read_csv(
-        "src/data/mrl_eos_68.txt",
-        sep=None,
-        header="infer",
-        comment="#",
-        engine="python",
+    mr_file = st.file_uploader(
+        "Upload mass-radius curve data", type=["txt", "csv", "tsv"]
     )
-    mrl_header = mrl_df.columns.values.tolist()
-    if "m" in mrl_header and "r" in mrl_header:
-        tabulated_radii = mrl_df["r"].tolist()
-        tabulated_masses = mrl_df["m"].tolist()
-        plot_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
+    if mr_file is not None:
+        mrl_df = pd.read_csv(
+            mr_file,  # pyright: ignore[reportArgumentType]
+            sep=None,
+            header="infer",
+            comment="#",
+            engine="python",
+        )
+        mrl_header = mrl_df.columns.values.tolist()
+        if "m" in mrl_header and "r" in mrl_header:
+            tabulated_radii = mrl_df["r"].tolist()
+            tabulated_masses = mrl_df["m"].tolist()
+            plot_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
     else:
         plot_mass_radius_curve(radii, masses)
-
-
-# def plot_tabulated_eos():
-#     densities, pressures = EOS_DATA
-#     eos_fig = generate_log_fig(
-#         densities,
-#         pressures,
-#         title="Tabulated EoS",
-#         x_label="Energy Density [MeV/fm^3]",
-#         y_label="Pressure [MeV/fm^3]",
-#         is_scatter=True,
-#     )
-#     st.pyplot(eos_fig)
-
-
-# def plot_lin_tabulated_eos():
-#     densities, pressures = EOS_DATA
-#     fig, ax = plt.subplots()
-#     ax.set_title("Linearly-Spaced EOS")
-#     ax.set_xlabel("Energy Density [MeV/fm^3]")
-#     ax.set_ylabel("Pressure [MeV/fm^3]")
-#     ax.scatter(densities, pressures)
-#     st.pyplot(fig)
-
-
-# def plot_tabulated_mr():
-#     radii, masses = MR_DATA
-#     mr_fig = generate_log_fig(
-#         radii,
-#         masses,
-#         title="Tabulated Mass-Radius Curve",
-#         x_label="Radius [km]",
-#         y_label="Mass [M☉]",
-#         is_scatter=True,
-#     )
-#     mr_ax = mr_fig.axes[0]
-#     mr_ax.plot(radii, masses, color="orange")
-#     st.pyplot(mr_fig)
-
-
-# def plot_lin_tabulated_mr():
-#     radii, masses = MR_DATA
-#     lin_mr_fig, lin_mr_ax = plt.subplots()
-#     lin_mr_ax.scatter(radii, masses)
-#     lin_mr_ax.set_title("Linearly-Spaced Mass-Radius Curve")
-#     lin_mr_ax.set_xlabel("Radius [km]")
-#     lin_mr_ax.set_ylabel("Mass [M☉]")
-#     st.pyplot(lin_mr_fig)
 
 
 def draw_ui_for_soc_eos():

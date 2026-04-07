@@ -28,8 +28,15 @@ def dimensionless_tov_rhs(r, state, eos_eps_p_fn):
 
 
 def surface_event(r, state: tuple[float, float], eos_eps_p_fn):
+    """
+    Event for detecting when pressure reaches 0. solve_ivp() detects a zero by
+    looking for a sign change. When the pressure is near 0, but small, this
+    function forces a sign change.
+    """
     p, _ = state
-    return p - 1e-5
+    # Force pressure to cross 0, triggering the event.
+    altered_p = p - 1e-5
+    return altered_p
 
 
 surface_event.terminal = True  # pyright: ignore[reportFunctionMemberAccess]
@@ -50,16 +57,18 @@ def solve_dimensionless_tov(
     m_0_p = (4 * pi / 3) * r_0_p**3 * eps_p
     solutions = solve_ivp(
         fun=dimensionless_tov_rhs,
-        # solve_ivp() should terminate before reaching the end of the input range.
+        # solve_ivp() should terminate before reaching the end of the input
+        # range.
         t_span=(r_0_p, 100),  # TODO: Tune range
         y0=(p_c_p, m_0_p),
         events=surface_event,
         args=(eos_eps_prime,),
+        max_step=0.1,
     )
     print("SOLVER DEBUG" + "-" * 70)
     print(solutions.status)
     print(solutions.message)
-    print(f"Pressures: {solutions.y[0][-10:]}")
+    print(f"Dimensionless Pressures: {solutions.y[0][-10:]}")
     radius_surface_events: np.ndarray = solutions.t_events[0]
     state_surface_events: list[tuple[float, float]] = solutions.y_events[0]
     if radius_surface_events.size == 0:
