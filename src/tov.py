@@ -1,6 +1,7 @@
 from typing import Callable
 
-from numpy import pi
+import numpy as np
+from scipy.constants import pi
 from scipy.integrate import solve_ivp
 
 from eos.dimensionless import (
@@ -26,9 +27,9 @@ def dimensionless_tov_rhs(r, state, eos_eps_p_fn):
     return (dp_dr, dm_dr)
 
 
-def surface_event(r, state: tuple[float, float], eos_eps_fn):
+def surface_event(r, state: tuple[float, float], eos_eps_p_fn):
     p, _ = state
-    return p
+    return p - 1e-5
 
 
 surface_event.terminal = True  # pyright: ignore[reportFunctionMemberAccess]
@@ -50,19 +51,36 @@ def solve_dimensionless_tov(
     solutions = solve_ivp(
         fun=dimensionless_tov_rhs,
         # solve_ivp() should terminate before reaching the end of the input range.
-        t_span=(r_0_p, 50),  # TODO: Tune range
+        t_span=(r_0_p, 100),  # TODO: Tune range
         y0=(p_c_p, m_0_p),
         events=surface_event,
         args=(eos_eps_prime,),
     )
-    # radius_surface_events: ndarray = solutions.t_events[0]
-    # p_m_surface_events: list[tuple[float, float]] = solutions.y_events[0]
-    # if radius_surface_events.size == 0:
-    #     raise ValueError("No events registered")
-    # r_p = radius_surface_events[0]
-    # m_p = p_m_surface_events[0][1]
-    r_p = max(solutions.t)
-    m_p = max(solutions.y[1])
-    r_nu = radius_nu(r_p)
-    m_nu = mass_nu(m_p)
+    # print("SOLVER DEBUG")
+    # print(solutions.status)
+    # print(solutions.message)
+    # print(solutions.y[0][-10:])
+    radius_surface_events: np.ndarray = solutions.t_events[0]
+    state_surface_events: list[tuple[float, float]] = solutions.y_events[0]
+    if radius_surface_events.size == 0:
+        raise ValueError("No events registered")
+    r_surface_p = radius_surface_events[0]
+    p_surface_p, m_surface_p = state_surface_events[0]
+    r_nu = radius_nu(r_surface_p)
+    m_nu = mass_nu(m_surface_p)
     return (r_nu, m_nu)
+
+
+def generate_mass_radius_curve(
+    p_c_magnitude_range: tuple[float, float],
+    eos_eps_fn: Callable[[float], float],
+) -> tuple[list[float], list[float]]:
+    p_start, p_end = p_c_magnitude_range
+    p_c_values = np.logspace(p_start, p_end, num=100)
+    radii = []
+    masses = []
+    for p_c in p_c_values:
+        radius, mass = solve_dimensionless_tov(p_c, eos_eps_fn)
+        radii.append(radius)
+        masses.append(mass)
+    return (radii, masses)

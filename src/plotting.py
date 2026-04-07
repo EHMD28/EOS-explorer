@@ -59,6 +59,27 @@ def load_mr_curve_from_df(path: Path) -> tuple[list[float], list[float]]:
     return (radii.tolist(), masses.tolist())
 
 
+def generate_lin_fig(
+    xs: list[float],
+    ys: list[float],
+    title: str = "",
+    x_label: str = "",
+    y_label: str = "",
+    is_scatter: bool = False,
+) -> Figure:
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.set_title(title)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    if is_scatter:
+        ax.scatter(xs, ys)
+    else:
+        ax.plot(xs, ys)
+    fig.add_axes(ax)
+    return fig
+
+
 def generate_log_fig(
     xs: list[float],
     ys: list[float],

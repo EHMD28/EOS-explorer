@@ -6,8 +6,8 @@ import streamlit as st
 
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
-from plotting import generate_log_fig
-from tov import solve_dimensionless_tov
+from plotting import generate_lin_fig, generate_log_fig
+from tov import generate_mass_radius_curve, solve_dimensionless_tov
 
 EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
 
@@ -100,6 +100,18 @@ def draw_and_get_eos_data_from_upload():
     return data
 
 
+def plot_mass_radius_curve(radii: list[float], masses: list[float]):
+    fig = generate_lin_fig(
+        radii,
+        masses,
+        title="Mass-Radius Curve",
+        x_label="Radius [km]",
+        y_label="Masses [M_sun]",
+        is_scatter=True,
+    )
+    st.pyplot(fig)
+
+
 def draw_ui_for_polytropic_eos():
     draw_info_for_polytropic_eos()
     col_one, col_two = st.columns(spec=[0.4, 0.6])
@@ -107,13 +119,14 @@ def draw_ui_for_polytropic_eos():
         kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
         eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
         eos_data = draw_and_get_eos_data_from_upload()
-        r, m = solve_dimensionless_tov(
-            p_c=150,
-            eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma),
-        )
-        st.text(f"Radius: {r} | Mass: {m}")
     with col_two:
         draw_polytropic_eos_plot(kappa, gamma, eps_magnitudes=(eps_start, eps_end))
+    # TODO: Add sliders for pressure range
+    radii, masses = generate_mass_radius_curve(
+        p_c_magnitude_range=(1, 3),
+        eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma),
+    )
+    plot_mass_radius_curve(radii, masses)
 
 
 # def plot_tabulated_eos():
