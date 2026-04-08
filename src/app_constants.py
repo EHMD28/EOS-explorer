@@ -18,6 +18,7 @@ class ScalingConstants:
     """
 
     E_0 = 100  # Arbitrary scaling constant.
+    # TODO: Find calculation for this constant.
     G_NU = 1.4766  # km/solar-mass. This is the quantity for ensuring everything has a consistent unit for length and mass.
     A = 1 / np.sqrt(G_NU * E_0)
     B = 1 / np.sqrt(G_NU**3 * E_0)
