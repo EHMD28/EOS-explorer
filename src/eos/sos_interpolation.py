@@ -1,3 +1,3 @@
 """
-Speed of Sound Interpolation.
+Speed of Sound Interpolation EoS
 """

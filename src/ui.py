@@ -1,3 +1,7 @@
+"""
+All user interface code.
+"""
+
 import typing
 from typing import Literal
 
@@ -14,10 +18,13 @@ EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
 
 
 def draw_and_get_eos_dropdown() -> EOS_OPTIONS:
+    """
+    Write EoS selection dropdown to the UI and get the selected option.
+    """
     valid_options = typing.get_args(EOS_OPTIONS)
     # The pyright ignore statement is because Streamlit's return type isn't
     # technically correct.
-    option: EOS_OPTIONS = st.selectbox("Choose an EOS", valid_options)  # pyright: ignore[reportAssignmentType]
+    option: EOS_OPTIONS = st.selectbox("Choose an EoS", valid_options)  # pyright: ignore[reportAssignmentType]
     return option
 
 
@@ -25,6 +32,9 @@ def draw_and_get_eos_dropdown() -> EOS_OPTIONS:
 
 
 def draw_info_for_polytropic_eos():
+    """
+    Write relevant information for the polytropic EoS to the UI.
+    """
     st.markdown("# Polytropic Equation of State")
     st.latex(r"P(\varepsilon) = K\varepsilon^\gamma.")
     st.markdown(r"$P(\varepsilon)$ = Pressure in _MeV/fm^3_.")
@@ -44,8 +54,8 @@ def draw_info_for_polytropic_eos():
 
 def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
     """
-    Returns a tuple containing the chosen values of the parameters in the form
-    (kappa, gamma).
+    Write the parameter sliders to the UI. Returns a tuple containing the chosen
+    values of the parameters in the form (kappa, gamma).
     """
     st.markdown("# Parameters (not currently accurate)")
     kappa = st.number_input(
@@ -69,7 +79,8 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
 
 def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
     """
-    Returns a tuple containing the chosen range of energy density magnitude values.
+    Write the energy_density range slider to the UI. Returns a tuple containing
+    the chosen range of energy density order of magnitude values.
     """
     eps_start, eps_end = st.slider(
         label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
@@ -81,30 +92,12 @@ def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
     return (eps_start, eps_end)
 
 
-def draw_polytropic_eos_plot(
-    kappa: float,
-    gamma: float,
-    eps_magnitudes: tuple[float, float],
-    densities: list[float] | None = None,
-    pressures: list[float] | None = None,
-):
-    eps_start, eps_end = eps_magnitudes
-    eps_range = np.logspace(eps_start, eps_end, num=200)
-    p_values = polytropic_eos_p(eps_range.tolist(), kappa, gamma)
-    fig = generate_log_fig(
-        xs=eps_range.tolist(),
-        ys=p_values,
-        title="Pressure vs. Energy Density",
-        x_label="Energy Density [MeV/fm^3]",
-        y_label="Pressure [MeV/fm^3]",
-    )
-    if densities is not None and pressures is not None:
-        ax = fig.axes[0]
-        ax.scatter(densities, pressures, color="orange")
-    st.pyplot(fig)
-
-
 def draw_and_get_eos_data_from_upload() -> tuple[list[float], list[float]] | None:
+    """
+    Write the EoS file upload option to the UI. Returns a tuple of the form
+    (densities, pressure) if a file of the correct format was uploaded, otherwise
+    None.
+    """
     uploaded_file = st.file_uploader(
         label="Choose a data file", type=["txt", "csv", "tsv"]
     )
@@ -121,12 +114,45 @@ def draw_and_get_eos_data_from_upload() -> tuple[list[float], list[float]] | Non
     return None
 
 
+def draw_polytropic_eos_plot(
+    kappa: float,
+    gamma: float,
+    eps_magnitudes: tuple[float, float],
+    tabulated_densities: list[float] | None = None,
+    tabulated_pressures: list[float] | None = None,
+):
+    """
+    Write the EoS plot to the UI using the chosen parameters. If `densities` and
+    `pressures` (from a tabulated EoS) are included, then it will plot those as
+    points.
+    """
+    eps_start, eps_end = eps_magnitudes
+    eps_range = np.logspace(eps_start, eps_end, num=200)
+    p_values = polytropic_eos_p(eps_range.tolist(), kappa, gamma)
+    fig = generate_log_fig(
+        xs=eps_range.tolist(),
+        ys=p_values,
+        title="Pressure vs. Energy Density",
+        x_label="Energy Density [MeV/fm^3]",
+        y_label="Pressure [MeV/fm^3]",
+    )
+    if tabulated_densities is not None and tabulated_pressures is not None:
+        ax = fig.axes[0]
+        ax.scatter(tabulated_densities, tabulated_pressures, color="orange")
+    st.pyplot(fig)
+
+
 def plot_mass_radius_curve(
     radii: list[float],
     masses: list[float],
     tabulated_radii: list[float] | None = None,
     tabulated_masses: list[float] | None = None,
 ):
+    """
+    Write the mass-radius curve plot to the UI using the chosen parameters. If
+    `tabulated_radii` and `tabulated_masses` (from a tabulated EoS) are included,
+    then it will plot those as points.
+    """
     fig = generate_log_fig(
         radii,
         masses,
@@ -142,6 +168,9 @@ def plot_mass_radius_curve(
 
 
 def draw_ui_for_polytropic_eos():
+    """
+    Write all components to the UI for a polytropic EoS.
+    """
     draw_info_for_polytropic_eos()
     col_one, col_two = st.columns(spec=[0.4, 0.6])
     with col_one:
@@ -154,8 +183,8 @@ def draw_ui_for_polytropic_eos():
             kappa,
             gamma,
             eps_magnitudes=(eps_start, eps_end),
-            densities=densities,
-            pressures=pressures,
+            tabulated_densities=densities,
+            tabulated_pressures=pressures,
         )
     # TODO: Add sliders for pressure range
     radii, masses = generate_mass_radius_curve(
@@ -188,6 +217,9 @@ def draw_ui_for_soc_eos():
 
 
 def draw_ui():
+    """
+    Write components to user interface.
+    """
     eos_dropdown = draw_and_get_eos_dropdown()
     match eos_dropdown:
         case "Polytropic":

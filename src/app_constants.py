@@ -7,18 +7,18 @@ class AppConstants:
     FAVICON_PATH = Path("assets/favicon.png")
 
 
-# EOS_FILE_PATH = Path("src/data/eos_68.txt")
-# MRL_FILE_PATH = Path("src/data/mrl_eos_68.txt")
-
-
 class ScalingConstants:
     """
     Dimensionless TOV scaling constants. This implementation is taken directly
     from Section 4.3 of Compact Star Physics by  Jürgen Schaffner-Bielich.
     """
 
-    E_0 = 100  # Arbitrary scaling constant.
-    # TODO: Find calculation for this constant.
-    G_NU = 1.4766  # km/solar-mass. This is the quantity for ensuring everything has a consistent unit for length and mass.
-    A = 1 / np.sqrt(G_NU * E_0)
-    B = 1 / np.sqrt(G_NU**3 * E_0)
+    # Arbitrary scaling constant.
+    E_0 = 100
+    # TODO: Find calculation for this constant. Possibly a bug.
+    # This is the quantity for ensuring everything has a consistent unit for length and mass.
+    G_NU = 1.4766  # km/solar-mass.
+    # Radius scaling constant
+    A = 1 / np.sqrt(G_NU * E_0)  # km
+    # Mass scaling constant
+    B = 1 / np.sqrt(G_NU**3 * E_0)  # M_sun

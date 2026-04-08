@@ -1,3 +1,8 @@
+"""
+Tolman-Oppenheimer-Volkoff equation solver. Note that any time a variable is
+suffixed with `_p` (meaning prime), that means that quantity is dimensionless.
+"""
+
 from typing import Callable
 
 import numpy as np
@@ -14,6 +19,11 @@ from eos.dimensionless import (
 
 
 def dimensionless_tov_rhs(r, state, eos_eps_p_fn):
+    """
+    Right-hand side of the dimensionless TOV equation. The `eos_eps_p_fn` is a
+    callback function which takes dimensionless pressure as input and outputs
+    dimensionless energy density.
+    """
     p_p, m_p = state
     eps_p = eos_eps_p_fn(p_p)
     # dP/dr split into factors
@@ -46,6 +56,13 @@ surface_event.direction = -1  # pyright: ignore[reportFunctionMemberAccess]
 def solve_dimensionless_tov(
     p_c: float, eos_eps_fn: Callable[[float], float]
 ) -> tuple[float, float]:
+    """
+    Solve the TOV equation for a given central pressure (`p_c`). The `eos_eps_fn`
+    is a callback function which takes in pressure in natural units [MeV/fm^3]
+    and outputs energy density in natural units [MeV/fm^3]. Returns a tuple
+    of the form (radius, mass) where both quantities are in natural units.
+    """
+
     def eos_eps_prime(p_p: float) -> float:
         p_nu = pressure_nu(p_p)
         eps_nu = eos_eps_fn(p_nu)
@@ -65,10 +82,6 @@ def solve_dimensionless_tov(
         args=(eos_eps_prime,),
         max_step=0.1,
     )
-    print("SOLVER DEBUG" + "-" * 70)
-    print(solutions.status)
-    print(solutions.message)
-    print(f"Dimensionless Pressures: {solutions.y[0][-10:]}")
     radius_surface_events: np.ndarray = solutions.t_events[0]
     state_surface_events: list[tuple[float, float]] = solutions.y_events[0]
     if radius_surface_events.size == 0:
@@ -84,6 +97,13 @@ def generate_mass_radius_curve(
     p_c_magnitude_range: tuple[float, float],
     eos_eps_fn: Callable[[float], float],
 ) -> tuple[list[float], list[float]]:
+    """
+    Solve the TOV equation over a range of central pressures. The solver will be
+    run for 100 logarithmically spaced points on the interval 10^`p_start` ->
+    10^`p_end` (where `p_c_magnitude_range` = (`p_start`, `p_end`)) The `eos_eps_fn`
+    is a callback function which takes in pressure in natural units [MeV/fm^3]
+    and outputs energy density in natural units [MeV/fm^3].
+    """
     p_start, p_end = p_c_magnitude_range
     p_c_values = np.logspace(p_start, p_end, num=100)
     radii = []

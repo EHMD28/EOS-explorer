@@ -1,3 +1,7 @@
+"""
+Utility functions for figure generation.
+"""
+
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
@@ -10,6 +14,11 @@ def generate_lin_fig(
     y_label: str = "",
     is_scatter: bool = False,
 ) -> Figure:
+    """
+    Generate a figure with linear axes. `xs` and `ys` are the x-values and
+    y-values of the data respsectively. The rest of the arguments are pretty
+    self-explanatory.
+    """
     fig = plt.figure()
     ax = plt.axes()
     ax.set_title(title)
@@ -31,6 +40,11 @@ def generate_log_fig(
     y_label: str = "",
     is_scatter: bool = False,
 ) -> Figure:
+    """
+    Generate a figure with logarithmic axes. `xs` and `ys` are the x-values and
+    y-values of the data respsectively. The rest of the arguments are pretty
+    self-explanatory.
+    """
     fig = plt.figure()
     ax = plt.axes()
     ax.set_title(title)

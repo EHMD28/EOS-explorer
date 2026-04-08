@@ -10,7 +10,7 @@ from ui import draw_ui
 
 def configure_streamlit():
     st.set_page_config(
-        page_title="EOS Explorer", page_icon=AppConstants.FAVICON_PATH, layout="wide"
+        page_title="EoS Explorer", page_icon=AppConstants.FAVICON_PATH, layout="wide"
     )
 
 
