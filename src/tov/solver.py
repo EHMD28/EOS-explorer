@@ -9,7 +9,7 @@ import numpy as np
 from scipy.constants import pi
 from scipy.integrate import solve_ivp
 
-from eos.dimensionless import (
+from dimensionless import (
     energy_density_prime,
     mass_nu,
     pressure_nu,

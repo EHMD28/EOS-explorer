@@ -12,7 +12,7 @@ import streamlit as st
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
 from plotting import generate_log_fig
-from tov import generate_mass_radius_curve
+from tov.solver import generate_mass_radius_curve
 
 EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
 
