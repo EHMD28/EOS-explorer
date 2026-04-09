@@ -5,7 +5,7 @@ This file in the entry point of the application.
 import streamlit as st
 
 from app_constants import AppConstants
-from ui import draw_ui
+from ui.all_ui import draw_ui
 
 
 def configure_streamlit():

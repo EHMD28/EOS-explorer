@@ -17,6 +17,8 @@ from dimensionless import (
     radius_nu,
 )
 
+EOS_EPS_FN_TYPE = Callable[[float], float]
+
 
 def dimensionless_tov_rhs(r, state, eos_eps_p_fn):
     """
@@ -54,7 +56,7 @@ surface_event.direction = -1  # pyright: ignore[reportFunctionMemberAccess]
 
 
 def solve_dimensionless_tov(
-    p_c: float, eos_eps_fn: Callable[[float], float]
+    p_c: float, eos_eps_fn: EOS_EPS_FN_TYPE
 ) -> tuple[float, float]:
     """
     Solve the TOV equation for a given central pressure (`p_c`). The `eos_eps_fn`
@@ -95,7 +97,7 @@ def solve_dimensionless_tov(
 
 def generate_mass_radius_curve(
     p_c_magnitude_range: tuple[float, float],
-    eos_eps_fn: Callable[[float], float],
+    eos_eps_fn: EOS_EPS_FN_TYPE,
 ) -> tuple[list[float], list[float]]:
     """
     Solve the TOV equation over a range of central pressures. The solver will be

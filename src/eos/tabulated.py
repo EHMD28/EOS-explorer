@@ -27,7 +27,9 @@ def load_eos_from_file(data_file: TextIO) -> tuple[list[float], list[float]] | N
         return None
 
 
-def load_mr_curve_from_df(data_file: TextIO) -> tuple[list[float], list[float]] | None:
+def load_mr_curve_from_file(
+    data_file: TextIO,
+) -> tuple[list[float], list[float]] | None:
     """
     Extracts the masses and radii from `data_file`. This function
     assumes that `data_file` has a header row with columns m (mass [solar masses])

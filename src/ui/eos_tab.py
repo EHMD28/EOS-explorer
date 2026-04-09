@@ -11,20 +11,21 @@ import streamlit as st
 
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
+from eos.tabulated import load_mr_curve_from_file
 from plotting import generate_log_fig
-from tov.solver import generate_mass_radius_curve
+from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
-EOS_OPTIONS = Literal["Polytropic", "Speed-of-Sound Interpolation"]
+EOS_OPTIONS_TYPE = Literal["Polytropic", "Speed-of-Sound Interpolation"]
 
 
-def draw_and_get_eos_dropdown() -> EOS_OPTIONS:
+def draw_and_get_eos_dropdown() -> EOS_OPTIONS_TYPE:
     """
     Write EoS selection dropdown to the UI and get the selected option.
     """
-    valid_options = typing.get_args(EOS_OPTIONS)
+    valid_options = typing.get_args(EOS_OPTIONS_TYPE)
     # The pyright ignore statement is because Streamlit's return type isn't
     # technically correct.
-    option: EOS_OPTIONS = st.selectbox("Choose an EoS", valid_options)  # pyright: ignore[reportAssignmentType]
+    option: EOS_OPTIONS_TYPE = st.selectbox("Choose an EoS", valid_options)  # pyright: ignore[reportAssignmentType]
     return option
 
 
@@ -79,7 +80,7 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
 
 def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
     """
-    Write the energy_density range slider to the UI. Returns a tuple containing
+    Write the energy density range slider to the UI. Returns a tuple containing
     the chosen range of energy density order of magnitude values.
     """
     eps_start, eps_end = st.slider(
@@ -142,7 +143,26 @@ def draw_polytropic_eos_plot(
     st.pyplot(fig)
 
 
-def plot_mass_radius_curve(
+# -------------------- General UI --------------------
+
+
+def draw_and_get_pressure_range() -> tuple[float, float]:
+    """
+    Write the pressure range slider to the UI. Returns a tuple containing
+    the chosen orders of magnitude for pressure [MeV/fm^3] in the form
+    (start, end).
+    """
+    p_start, p_end = st.slider(
+        label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
+        # Min and max value are arbitary. Might change/remove them later.
+        min_value=-20,
+        max_value=20,
+        value=(0, 4),
+    )
+    return (p_start, p_end)
+
+
+def draw_mass_radius_curve(
     radii: list[float],
     masses: list[float],
     tabulated_radii: list[float] | None = None,
@@ -150,8 +170,8 @@ def plot_mass_radius_curve(
 ):
     """
     Write the mass-radius curve plot to the UI using the chosen parameters. If
-    `tabulated_radii` and `tabulated_masses` (from a tabulated EoS) are included,
-    then it will plot those as points.
+    `tabulated_radii` and `tabulated_masses` are included, then it will plot
+    those as points.
     """
     fig = generate_log_fig(
         radii,
@@ -186,43 +206,38 @@ def draw_ui_for_polytropic_eos():
             tabulated_densities=densities,
             tabulated_pressures=pressures,
         )
-    # TODO: Add sliders for pressure range
-    radii, masses = generate_mass_radius_curve(
-        p_c_magnitude_range=(1, 5),
-        eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma),
+    draw_ui_for_mass_radius_curve(
+        eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
     )
-    # TODO: Move to appropriate location
-    mr_file = st.file_uploader(
-        "Upload mass-radius curve data", type=["txt", "csv", "tsv"]
-    )
-    if mr_file is not None:
-        mrl_df = pd.read_csv(
-            mr_file,  # pyright: ignore[reportArgumentType]
-            sep=None,
-            header="infer",
-            comment="#",
-            engine="python",
-        )
-        mrl_header = mrl_df.columns.values.tolist()
-        if "m" in mrl_header and "r" in mrl_header:
-            tabulated_radii = mrl_df["r"].tolist()
-            tabulated_masses = mrl_df["m"].tolist()
-            plot_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
-    else:
-        plot_mass_radius_curve(radii, masses)
 
 
 def draw_ui_for_soc_eos():
     st.text("Work In Progress")
 
 
-def draw_ui():
+def draw_and_get_mr_data_from_upload() -> tuple[list[float], list[float]] | None:
     """
-    Write components to user interface.
+    Write the mass-radius curve file upload option to the UI. Returns a tuple of
+    the form (radii, masses) if a file of the correct format was uploaded, otherwise
+    None.
     """
-    eos_dropdown = draw_and_get_eos_dropdown()
-    match eos_dropdown:
-        case "Polytropic":
-            draw_ui_for_polytropic_eos()
-        case "Speed-of-Sound Interpolation":
-            draw_ui_for_soc_eos()
+    uploaded_file = st.file_uploader(
+        label="Choose a data file", type=["txt", "csv", "tsv"]
+    )
+    if uploaded_file is not None:
+        return load_mr_curve_from_file(uploaded_file)  # pyright: ignore[reportArgumentType]
+    else:
+        return None
+
+
+def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE):
+    p_start, p_end = draw_and_get_pressure_range()
+    radii, masses = generate_mass_radius_curve(
+        p_c_magnitude_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
+    )
+    data = draw_and_get_mr_data_from_upload()
+    if data is not None:
+        tabulated_radii, tabulated_masses = data
+        draw_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
+    else:
+        draw_mass_radius_curve(radii, masses)
