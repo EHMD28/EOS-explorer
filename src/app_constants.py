@@ -15,9 +15,8 @@ class ScalingConstants:
 
     # Arbitrary scaling constant.
     E_0 = 100
-    # TODO: Find calculation for this constant. Possibly a bug.
-    # This is the quantity for ensuring everything has a consistent unit for length and mass.
-    G_NU = 1.4766  # km/solar-mass.
+    # Gravitational constant. Refer to `Calculations.md` for derivation.
+    G_NU = 4.426810498  # km/M_sun.
     # Radius scaling constant
     A = 1 / np.sqrt(G_NU * E_0)  # km
     # Mass scaling constant
