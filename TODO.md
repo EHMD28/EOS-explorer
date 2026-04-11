@@ -21,6 +21,12 @@
     - [ ] Run TOV for specific central pressure
         - [ ] Plot pressure and mass of star vs radius.
 
+# Math
+
+- [ ] Add TOV equation
+- [ ] Add dimensionless TOV equation
+- [ ] Add polytropic EoS
+
 # Research Paper
 
 - [ ] Remove identifying information
