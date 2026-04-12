@@ -17,6 +17,15 @@ def handle_pressure_prime_change():
     st.session_state[StreamlitKeys.PRESSURE_NU_OUTPUT] = p_nu
 
 
+def draw_dimensionless_conversion_info():
+    st.markdown("# Dimensionless Value Conversions")
+    st.markdown(
+        f"Arbitrary Scaling Constant ($\\varepsilon_0$): {ScalingConstants.EPS_0} MeV/fm^3"
+    )
+    st.latex(r"P = \varepsilon_0 \cdot P'")
+    st.latex(r"\varepsilon = \varepsilon_0 \cdot \varepsilon'")
+
+
 def draw_ui_for_pressure_density_conversion():
     st.markdown("## Pressure and Energy Density")
     st.number_input(
@@ -39,13 +48,12 @@ def draw_ui_for_pressure_density_conversion():
     st.text(f"Pressure or Energy Density [MeV/fm^3]: {p_eps_nu:e}")
 
 
+def draw_ui_for_tov_solver():
+    st.markdown("## TOV Solver")
+    p_c = st.number_input("Central Pressure [MeV/fm^3]", value=150, format="%e")
+
+
 def draw_ui_for_dimensionless_conversion():
-    st.text(f"DEBUG: {pressure_prime(100)}")
-    st.markdown("# Dimensionless Value Conversions")
-    st.markdown(
-        f"Arbitrary Scaling Constant ($\\varepsilon_0$): {ScalingConstants.EPS_0} MeV/fm^3"
-    )
-    st.latex(r"P = \varepsilon_0 \cdot P'")
-    st.latex(r"\varepsilon = \varepsilon_0 \cdot \varepsilon'")
+    draw_dimensionless_conversion_info()
     draw_ui_for_pressure_density_conversion()
-    st.write(st.session_state)
+    draw_ui_for_tov_solver()

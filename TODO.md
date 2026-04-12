@@ -17,7 +17,7 @@
 - [ ] Plot mass-radius curve
 - [x] Plot EoS graph
 - [ ] Debugging tab
-    - [ ] Convert betewen dimensionless and dimensional values
+    - [x] Convert betewen dimensionless and dimensional values
     - [ ] Run TOV for specific central pressure
         - [ ] Plot pressure and mass of star vs radius.
 
