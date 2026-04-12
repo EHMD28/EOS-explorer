@@ -26,7 +26,15 @@ class ScalingConstants:
 
 
 class StreamlitKeys:
+    """
+    Keys to use with Streamlit's session state API.
+    """
+
+    # Pressure (in natural units) input
     PRESSURE_NU_INPUT = "pressure-input-natural-units"
+    # Pressure (in natural units) output value
+    PRESSURE_NU_OUTPUT = "pressure-output-natural-units"
+    # Pressure (dimensionless) input
     PRESSURE_PRIME_INPUT = "pressure-input-dimensionless"
-    ENERGY_DENSITY_NU_INPUT = "energy-density-natural-units"
-    ENERGY_DENSITY_PRIME_INPUT = "energy-density-dimensionless"
+    # Pressure (dimensionless) output value
+    PRESSURE_PRIME_OUTPUT = "pressure-output-dimensionless"

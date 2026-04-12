@@ -1,27 +1,51 @@
 import streamlit as st
 
 from app_constants import ScalingConstants, StreamlitKeys
-from tov.dimensionless import pressure_prime
+from tov.dimensionless import pressure_nu, pressure_prime
+
+
+def handle_pressue_nu_change():
+    p_nu: float = st.session_state[StreamlitKeys.PRESSURE_NU_INPUT]
+    p_p = pressure_prime(p_nu)
+    print(f"DEBUG: {p_p=}")
+    st.session_state[StreamlitKeys.PRESSURE_PRIME_OUTPUT] = p_p
+
+
+def handle_pressure_prime_change():
+    p_p: float = st.session_state[StreamlitKeys.PRESSURE_PRIME_INPUT]
+    p_nu = pressure_nu(p_p)
+    st.session_state[StreamlitKeys.PRESSURE_NU_OUTPUT] = p_nu
 
 
 def draw_ui_for_pressure_density_conversion():
     st.markdown("## Pressure and Energy Density")
-    p_nu = st.number_input(
+    st.number_input(
         "Pressure or Energy Density [MeV/fm^3]",
-        value=1.0,
-        format="%0.10f",
+        value=100.0,
+        format="%e",
         key=StreamlitKeys.PRESSURE_NU_INPUT,
+        on_change=handle_pressue_nu_change,
     )
-    p_prime_init_val: float = pressure_prime(p_nu)  # pyright: ignore[reportAssignmentType]
-    p_prime = st.number_input(
-        "Pressure of Energy Density [dimensionless]",
-        value=p_prime_init_val,
-        format="%0.10f",
+    p_eps_p = st.session_state.get(StreamlitKeys.PRESSURE_PRIME_OUTPUT, 1.0)
+    st.text(f"Pressure or Energy Density [dimensionless]: {p_eps_p:e}")
+    st.number_input(
+        "Pressure or Energy Density [dimensionless]",
+        value=1.0,
+        format="%e",
         key=StreamlitKeys.PRESSURE_PRIME_INPUT,
+        on_change=handle_pressure_prime_change,
     )
+    p_eps_nu = st.session_state.get(StreamlitKeys.PRESSURE_NU_OUTPUT, 100.0)
+    st.text(f"Pressure or Energy Density [MeV/fm^3]: {p_eps_nu:e}")
 
 
 def draw_ui_for_dimensionless_conversion():
+    st.text(f"DEBUG: {pressure_prime(100)}")
     st.markdown("# Dimensionless Value Conversions")
-    st.markdown(f"Arbitrary Scaling Constant: {ScalingConstants.EPS_0} M_sun/km^3")
+    st.markdown(
+        f"Arbitrary Scaling Constant ($\\varepsilon_0$): {ScalingConstants.EPS_0} MeV/fm^3"
+    )
+    st.latex(r"P = \varepsilon_0 \cdot P'")
+    st.latex(r"\varepsilon = \varepsilon_0 \cdot \varepsilon'")
     draw_ui_for_pressure_density_conversion()
+    st.write(st.session_state)
