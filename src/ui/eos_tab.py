@@ -58,13 +58,13 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
     Write the parameter sliders to the UI. Returns a tuple containing the chosen
     values of the parameters in the form (kappa, gamma).
     """
-    st.markdown("# Parameters (not currently accurate)")
+    st.markdown("# Parameters ")
     kappa = st.number_input(
         label="K - Proportionality Constant",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
-        value=1.2,  # TODO: Change to a reasonable default
+        value=1e-2,  # TODO: Change to a reasonable default
         format="%0.10f",
     )
     gamma = st.number_input(
@@ -206,9 +206,9 @@ def draw_ui_for_polytropic_eos():
             tabulated_densities=densities,
             tabulated_pressures=pressures,
         )
-    draw_ui_for_mass_radius_curve(
-        eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
-    )
+    # draw_ui_for_mass_radius_curve(
+    #     eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
+    # )
 
 
 def draw_ui_for_soc_eos():

@@ -16,12 +16,11 @@ def draw_ui():
     tab_names = ["Main", "Debugging"]
     main_tab, debug_tab = st.tabs(tab_names)
     with main_tab:
-        ...
-        # eos_dropdown = draw_and_get_eos_dropdown()
-        # match eos_dropdown:
-        #     case "Polytropic":
-        #         draw_ui_for_polytropic_eos()
-        #     case "Speed-of-Sound Interpolation":
-        #         draw_ui_for_soc_eos()
+        eos_dropdown = draw_and_get_eos_dropdown()
+        match eos_dropdown:
+            case "Polytropic":
+                draw_ui_for_polytropic_eos()
+            case "Speed-of-Sound Interpolation":
+                draw_ui_for_soc_eos()
     with debug_tab:
         draw_ui_for_dimensionless_conversion()

@@ -1,13 +1,15 @@
+from matplotlib import pyplot as plt
 import streamlit as st
 
 from app_constants import ScalingConstants, StreamlitKeys
 from tov.dimensionless import pressure_nu, pressure_prime
+from tov.solver import TOV_Solutions, solve_dimensionless_tov
+from eos.polytropic import eos_eps as polytropic_eos_eps
 
 
 def handle_pressue_nu_change():
     p_nu: float = st.session_state[StreamlitKeys.PRESSURE_NU_INPUT]
     p_p = pressure_prime(p_nu)
-    print(f"DEBUG: {p_p=}")
     st.session_state[StreamlitKeys.PRESSURE_PRIME_OUTPUT] = p_p
 
 
@@ -48,9 +50,39 @@ def draw_ui_for_pressure_density_conversion():
     st.text(f"Pressure or Energy Density [MeV/fm^3]: {p_eps_nu:e}")
 
 
+def draw_solver_fig(solutions: TOV_Solutions):
+    st.text(f"Total Radius: {solutions.total_radius} km")
+    st.text(f"Total Mass: {solutions.total_mass} M_sun")
+    # TODO: Move to plotting.py
+    # fig, ax = plt.subplots()
+    # ax.plot(
+    #     solutions.solver_df["r_prime"],
+    #     solutions.solver_df["p_prime"],
+    #     color="red",
+    #     label="Pressure",
+    # )
+    # ax.plot(
+    #     solutions.solver_df["r_prime"],
+    #     solutions.solver_df["m_prime"],
+    #     color="blue",
+    #     label="Mass",
+    # )
+    # ax.legend()
+    # ax.set_xscale("log")
+    # ax.set_yscale("log")
+    # st.pyplot(fig)
+
+
 def draw_ui_for_tov_solver():
     st.markdown("## TOV Solver")
     p_c = st.number_input("Central Pressure [MeV/fm^3]", value=150, format="%e")
+    solutions = solve_dimensionless_tov(
+        p_c,
+        eos_eps_fn=lambda p: polytropic_eos_eps(
+            p, kappa=2.8, gamma=1.4952530968
+        ),  # Values manually found for M_sun/km^3 values.
+    )  # TODO: Change this
+    draw_solver_fig(solutions)
 
 
 def draw_ui_for_dimensionless_conversion():

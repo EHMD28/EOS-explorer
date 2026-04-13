@@ -15,7 +15,7 @@ class ScalingConstants:
 
     # Arbitrary scaling constant.
     EPS_0 = 100  # MeV/km^3
-    # Gravitational constant. Refer to `Calculations.md` for derivation.
+    # Gravitational constant. Refer to `math/Units.md` for derivation.
     G_NU = 4.426810498  # km/M_sun.
     # Radius scaling constant
     A = 1 / np.sqrt(G_NU * EPS_0)  # km
