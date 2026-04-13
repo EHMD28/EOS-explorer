@@ -101,16 +101,16 @@ def solve_dimensionless_tov(
     internals.
     """
 
-    eps0 = p_c_phys
+    eps0_phys = 150  # MeV/fm3
 
     def eos_eps_prime(p_p: float):
-        p_phys = eps0 * p_p
+        p_phys = eps0_phys * p_p
         eps_phys = eos_eps_nu_fn(p_phys)
-        return eps_phys / eps0
+        return eps_phys / eps0_phys
 
     # Since the scaling constant is the central pressure, the dimensionless
     # central pressue is 1.
-    p_c_p = 1.0
+    p_c_p = p_c_phys / eps0_phys
     eps_c_p = eos_eps_prime(p_c_p)
     # Small initial radius/mass
     r0_p = 1e-5
@@ -121,7 +121,9 @@ def solve_dimensionless_tov(
         y0=(p_c_p, m0_p),
         args=(eos_eps_prime,),
         events=surface_event,
-        max_step=0.1,
+        max_step=0.01,
+        rtol=1e-6,
+        atol=1e-8,
     )
     r_surface_p = None
     m_surface_p = None
@@ -134,7 +136,7 @@ def solve_dimensionless_tov(
         m_surface_p = solutions.y[1][-1]
 
     # Convert scaling constant to SI units so it matches G.
-    eps0_SI = eps0 * ScalingConstants.MEV_FM3_TO_J_M3
+    eps0_SI = eps0_phys * ScalingConstants.MEV_FM3_TO_J_M3
     a = c**2 / np.sqrt(G * eps0_SI)
     b = c**4 / np.sqrt(G**3 * eps0_SI)
     r_km = (a * r_surface_p) / 1000

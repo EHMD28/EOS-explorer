@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from app_constants import DebugConstants
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
 from eos.tabulated import load_mr_curve_from_file
@@ -64,16 +65,16 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
         # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
-        value=1e-2,  # TODO: Change to a reasonable default
-        format="%0.10f",
+        value=DebugConstants.MID_DENSITY_KAPPA,  # TODO: Change to a reasonable default
+        format="%e",
     )
     gamma = st.number_input(
         label="𝛾 - Stiffness Value",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-1.0,
         max_value=10.0,
-        value=1.4952530967691224,  # TODO: Change to a reasonable default
-        format="%0.10f",
+        value=DebugConstants.MID_DENSITY_GAMMA,  # TODO: Change to a reasonable default
+        format="%.10f",
     )
     return (kappa, gamma)
 
@@ -88,7 +89,7 @@ def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=10,
-        value=(-15, 1),
+        value=(-5, 5),
     )
     return (eps_start, eps_end)
 
@@ -100,7 +101,7 @@ def draw_and_get_eos_data_from_upload() -> tuple[list[float], list[float]] | Non
     None.
     """
     uploaded_file = st.file_uploader(
-        label="Choose a data file", type=["txt", "csv", "tsv"]
+        label="Choose an EoS data file", type=["txt", "csv", "tsv"]
     )
     # TODO: Move to appropriate file
     if uploaded_file is not None:
@@ -153,7 +154,7 @@ def draw_and_get_pressure_range() -> tuple[float, float]:
     (start, end).
     """
     p_start, p_end = st.slider(
-        label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
+        label=r"$P$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=20,
@@ -184,7 +185,9 @@ def draw_mass_radius_curve(
     if tabulated_radii is not None and tabulated_masses is not None:
         ax = fig.axes[0]
         ax.scatter(tabulated_radii, tabulated_masses)
-    st.pyplot(fig)
+    empty_col_1, plot_col, epmty_col2 = st.columns([1, 3, 1])
+    with plot_col:
+        st.pyplot(fig)
 
 
 def draw_ui_for_polytropic_eos():
@@ -206,9 +209,9 @@ def draw_ui_for_polytropic_eos():
             tabulated_densities=densities,
             tabulated_pressures=pressures,
         )
-    # draw_ui_for_mass_radius_curve(
-    #     eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
-    # )
+    draw_ui_for_mass_radius_curve(
+        eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
+    )
 
 
 def draw_ui_for_soc_eos():
@@ -222,7 +225,7 @@ def draw_and_get_mr_data_from_upload() -> tuple[list[float], list[float]] | None
     None.
     """
     uploaded_file = st.file_uploader(
-        label="Choose a data file", type=["txt", "csv", "tsv"]
+        label="Choose a mass-radius data file", type=["txt", "csv", "tsv"]
     )
     if uploaded_file is not None:
         return load_mr_curve_from_file(uploaded_file)  # pyright: ignore[reportArgumentType]

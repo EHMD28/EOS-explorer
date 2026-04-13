@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import streamlit as st
 
-from app_constants import ScalingConstants, StreamlitKeys
+from app_constants import DebugConstants, ScalingConstants, StreamlitKeys
 from tov.dimensionless import pressure_nu, pressure_prime
 from tov.solver import TOV_Solutions, solve_dimensionless_tov
 from eos.polytropic import eos_eps as polytropic_eos_eps
@@ -79,7 +79,9 @@ def draw_ui_for_tov_solver():
     radius_km, mass_msun = solve_dimensionless_tov(
         p_c,
         eos_eps_nu_fn=lambda p: polytropic_eos_eps(
-            p, kappa=1e-2, gamma=1.4952530968
+            p,
+            kappa=DebugConstants.MID_DENSITY_KAPPA,
+            gamma=DebugConstants.MID_DENSITY_GAMMA,
         ),  #
     )  # TODO: Change this
     st.text(f"Radius: {radius_km} km")

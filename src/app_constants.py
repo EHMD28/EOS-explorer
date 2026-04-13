@@ -31,6 +31,15 @@ class ScalingConstants:
     # MEV_FM3_TO_MSUN_KM3 = 8.96523625e-7
 
 
+class DebugConstants:
+    # Polytrope fitted to lower densities
+    LOW_DENSITY_KAPPA = 1e-2
+    LOW_DENSITY_GAMMA = 1.4952530968
+    # Polytrope fitted around 10 MeV/fm3
+    MID_DENSITY_KAPPA = 1.2e-3
+    MID_DENSITY_GAMMA = 1.75
+
+
 class StreamlitKeys:
     """
     Keys to use with Streamlit's session state API.
