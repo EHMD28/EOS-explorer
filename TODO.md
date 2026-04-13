@@ -23,9 +23,10 @@
 
 # Math
 
-- [ ] Add TOV equation
-- [ ] Add dimensionless TOV equation
+- [x] Add TOV equation
+- [x] Add dimensionless TOV equation
 - [ ] Add polytropic EoS
+- [ ] Update all PDFs
 
 # Research Paper
 

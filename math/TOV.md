@@ -1,6 +1,6 @@
 # Tolman-Oppenheimer-Volkoff Equation
 
-The general form of the TOV equation for this project is as follows.
+The general relativistic form of the TOV equation is as follows [1].
 
 $$
 \frac{dP(r)}{dr} = 
@@ -56,3 +56,7 @@ The mass-conservation equation scales as one would expect
 $$ \frac{d m_r'}{dr'} = 4\pi r'^2 \varepsilon' $$
 
 Note that the equations are now reliant on an EoS of the form $P'(\varepsilon')$.
+
+## Sources
+
+1. Compact Star Physics by Jürgen Schaffner-Bielich
