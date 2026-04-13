@@ -76,13 +76,14 @@ def draw_solver_fig(solutions: TOV_Solutions):
 def draw_ui_for_tov_solver():
     st.markdown("## TOV Solver")
     p_c = st.number_input("Central Pressure [MeV/fm^3]", value=150, format="%e")
-    solutions = solve_dimensionless_tov(
+    radius_km, mass_msun = solve_dimensionless_tov(
         p_c,
-        eos_eps_fn=lambda p: polytropic_eos_eps(
-            p, kappa=2.8, gamma=1.4952530968
-        ),  # Values manually found for M_sun/km^3 values.
+        eos_eps_nu_fn=lambda p: polytropic_eos_eps(
+            p, kappa=1e-2, gamma=1.4952530968
+        ),  #
     )  # TODO: Change this
-    draw_solver_fig(solutions)
+    st.text(f"Radius: {radius_km} km")
+    st.text(f"Mass: {mass_msun} M_sun")
 
 
 def draw_ui_for_dimensionless_conversion():

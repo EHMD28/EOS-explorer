@@ -72,7 +72,7 @@ def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-1.0,
         max_value=10.0,
-        value=1.4952530967691224 * 1,  # TODO: Change to a reasonable default
+        value=1.4952530967691224,  # TODO: Change to a reasonable default
         format="%0.10f",
     )
     return (kappa, gamma)

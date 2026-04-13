@@ -13,16 +13,22 @@ class ScalingConstants:
     from Section 4.3 of Compact Star Physics by  Jürgen Schaffner-Bielich.
     """
 
-    # Arbitrary scaling constant.
-    EPS_0 = 100  # MeV/km^3
-    # Gravitational constant. Refer to `math/Units.md` for derivation.
-    G_NU = 4.426810498  # km/M_sun.
-    # Radius scaling constant
-    A = 1 / np.sqrt(G_NU * EPS_0)  # km
-    # Mass scaling constant
-    B = 1 / np.sqrt(G_NU**3 * EPS_0)  # M_sun
-    # Conversion factor to convert from MeV/fm^3 to M_sun/km^3
-    MEV_FM3_TO_MSUN_KM3 = 8.96523625e-7
+    MEV_FM3_TO_J_M3 = 1.602176634e32
+    M_SUN_IN_KG = 1.988416e30
+    # TODO: Delete unecessary constants
+    # # Arbitrary scaling constant.
+    EPS_0 = 100  # MeV/fm^3
+    # # Gravitational constant in relativistic units. Refer to `math/Units.md`
+    # # for derivation.
+    # G_KM_MSUN = 4.426810498  # km/M_sun.
+    # # Speed of light in terms of km and seconds
+    # c_km = 2.99792458e5  # km/s
+    # # Radius scaling constant
+    # A = c_km**2 / np.sqrt(G_KM_MSUN * EPS_0)  # km
+    # # Mass scaling constant
+    # B = c_km**4 / np.sqrt(G_KM_MSUN**3 * EPS_0)  # M_sun
+    # # Conversion factor to convert from MeV/fm^3 to M_sun/km^3
+    # MEV_FM3_TO_MSUN_KM3 = 8.96523625e-7
 
 
 class StreamlitKeys:
