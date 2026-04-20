@@ -5,6 +5,7 @@ All user interface code.
 import typing
 from typing import Literal
 
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -13,7 +14,6 @@ from app_constants import DebugConstants
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
 from eos.tabulated import load_mr_curve_from_file
-from plotting import generate_log_fig
 from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
 EOS_OPTIONS_TYPE = Literal["Polytropic", "Speed-of-Sound Interpolation"]
@@ -129,18 +129,20 @@ def draw_polytropic_eos_plot(
     points.
     """
     eps_start, eps_end = eps_magnitudes
-    eps_range = np.logspace(eps_start, eps_end, num=200)
-    p_values = polytropic_eos_p(eps_range.tolist(), kappa, gamma)
-    fig = generate_log_fig(
-        xs=eps_range.tolist(),
-        ys=p_values,
-        title="Pressure vs. Energy Density",
-        x_label="Energy Density [MeV/fm^3]",
-        y_label="Pressure [MeV/fm^3]",
-    )
+    eps_values = np.logspace(eps_start, eps_end, num=200)
+    p_values = polytropic_eos_p(eps_values.tolist(), kappa, gamma)
+    fig, ax = plt.subplots()
+    ax.set_title("Pressure vs. Energy Density")
+    ax.set_xlabel("Energy Density [MeV/fm^3]")
+    ax.set_xscale("log")
+    ax.set_ylabel("Pressure [MeV/fm^3]")
+    ax.set_yscale("log")
+    ax.plot(eps_values, p_values, color="blue", label="TOV Solver")
     if tabulated_densities is not None and tabulated_pressures is not None:
-        ax = fig.axes[0]
-        ax.scatter(tabulated_densities, tabulated_pressures, color="orange")
+        ax.scatter(
+            tabulated_densities, tabulated_pressures, color="orange", label="Tabulated"
+        )
+    ax.legend()
     st.pyplot(fig)
 
 
@@ -174,18 +176,16 @@ def draw_mass_radius_curve(
     `tabulated_radii` and `tabulated_masses` are included, then it will plot
     those as points.
     """
-    fig = generate_log_fig(
-        radii,
-        masses,
-        title="Mass-Radius Curve",
-        x_label="Radius [km]",
-        y_label="Masses [M_sun]",
-        is_scatter=True,
-    )
+    fig, ax = plt.subplots()
+    ax.set_title("Mass-Radius Curve")
+    ax.set_xlabel("Radius [km]")
+    ax.set_xscale("log")
+    ax.set_ylabel("Mass [M_sun]")
     if tabulated_radii is not None and tabulated_masses is not None:
-        ax = fig.axes[0]
-        ax.scatter(tabulated_radii, tabulated_masses)
-    empty_col_1, plot_col, epmty_col2 = st.columns([1, 3, 1])
+        ax.scatter(tabulated_radii, tabulated_masses, color="orange", label="Tabulated")
+    ax.scatter(radii, masses, color="blue", label="TOV Solver")
+    ax.legend()
+    left_margin, plot_col, right_margin = st.columns([1, 3, 1])
     with plot_col:
         st.pyplot(fig)
 

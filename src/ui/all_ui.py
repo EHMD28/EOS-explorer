@@ -1,4 +1,3 @@
-from app_constants import StreamlitKeys
 from ui.debugging_tab import draw_ui_for_dimensionless_conversion
 from ui.eos_tab import (
     draw_and_get_eos_dropdown,

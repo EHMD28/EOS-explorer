@@ -3,54 +3,29 @@ Tolman-Oppenheimer-Volkoff equation solver. Note that any time a variable is
 suffixed with `_p` (meaning prime), that means that quantity is dimensionless.
 """
 
-from typing import Callable
+from typing import Callable, TypedDict
 
 import numpy as np
-import pandas as pd
 from scipy.integrate import solve_ivp
 from scipy.constants import G, c, pi
 
 from app_constants import ScalingConstants
 
 
-# TODO: Add docstrings
-class TOV_Solutions:
-    central_pressure: float
-    total_radius: float
-    total_mass: float
-    solver_df: pd.DataFrame
-
-    def __init__(self, solutions, p_c: float):
-        ...
-        # radius_surface_events: np.ndarray = solutions.t_events[0]
-        # state_surface_events: list[tuple[float, float]] = solutions.y_events[0]
-        # r_surface_p = None
-        # m_surface_p = None
-        # # If no events registered (pressure approached 0 asymptotically), then
-        # # default to the last values for radii and mass (both of which increase
-        # # monotonically).
-        # if radius_surface_events.size == 0:
-        #     r_surface_p = solutions.t[-1]
-        #     m_surface_p = solutions.y[1][-1]
-        # else:
-        #     r_surface_p = radius_surface_events[0]
-        #     p_surface_p, m_surface_p = state_surface_events[0]
-        # r_nu = radius_nu(r_surface_p)
-        # m_nu = mass_nu(m_surface_p)
-        # self.central_pressure = p_c
-        # self.total_radius = r_nu
-        # self.total_mass = m_nu
-        # # Used for displaying the internal values the solver found.
-        # self.solver_df = pd.DataFrame(
-        #     {
-        #         "p_prime": solutions.y[0],
-        #         "m_prime": solutions.y[1],
-        #         "r_prime": solutions.t,
-        #     }
-        # )
-
-
 EOS_EPS_FN_TYPE = Callable[[float], float]
+
+
+class TovSolutions:
+    """
+    Convenient type alias for the object returned from `solve_ivp`, taken directly from
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html
+    """
+
+    t: list[float]
+    y: list[list[float]]
+    t_events: list[list[float]]
+    y_events: list[list[tuple[float, float]]]
+    status: int
 
 
 def dimensionless_tov_rhs(
@@ -90,6 +65,35 @@ surface_event.terminal = True  # pyright: ignore[reportFunctionMemberAccess]
 surface_event.direction = -1  # pyright: ignore[reportFunctionMemberAccess]
 
 
+def get_mr_from_solutions(solutions: TovSolutions) -> tuple[float, float]:
+    r_surface_p = None
+    m_surface_p = None
+    # If a termination event occurs, use the event value. Otherwise, fallback to
+    # last values for radius and mass (since both increase monotonically).
+    if solutions.status == 1:
+        # t_events[0] is a list of surface event radii. t_events[0][0] is the
+        # first (and only) radius in that list
+        r_surface_p = solutions.t_events[0][0]
+        # y_events[0] is a list of surface event states. y_events[0][0] is the
+        # first surface event state (a tuple of the form (pressure, mass)).
+        m_surface_p = solutions.y_events[0][0][1]
+    else:
+        # Use the last value of radius solve_ivp found.
+        r_surface_p = solutions.t[-1]
+        # Use the last value of mass solve_ivp found.
+        m_surface_p = solutions.y[1][-1]
+    return (r_surface_p, m_surface_p)
+
+
+def convert_mr_dimensionless_to_physical(r_p: float, m_p: float):
+    eps0_SI = ScalingConstants.EPS_0 * ScalingConstants.MEV_FM3_TO_J_M3
+    a = c**2 / np.sqrt(G * eps0_SI)
+    b = c**4 / np.sqrt(G**3 * eps0_SI)
+    r_km = (a * r_p) / 1000  # meters -> kilometers
+    m_msun = (b * m_p) / ScalingConstants.M_SUN_IN_KG  # kilograms -> solar mass
+    return (r_km, m_msun)
+
+
 def solve_dimensionless_tov(
     p_c_phys: float, eos_eps_nu_fn: EOS_EPS_FN_TYPE
 ) -> tuple[float, float]:
@@ -101,21 +105,17 @@ def solve_dimensionless_tov(
     internals.
     """
 
-    eps0_phys = 150  # MeV/fm3
-
     def eos_eps_prime(p_p: float):
-        p_phys = eps0_phys * p_p
+        p_phys = ScalingConstants.EPS_0 * p_p
         eps_phys = eos_eps_nu_fn(p_phys)
-        return eps_phys / eps0_phys
+        return eps_phys / ScalingConstants.EPS_0
 
-    # Since the scaling constant is the central pressure, the dimensionless
-    # central pressue is 1.
-    p_c_p = p_c_phys / eps0_phys
+    p_c_p = p_c_phys / ScalingConstants.EPS_0
     eps_c_p = eos_eps_prime(p_c_p)
     # Small initial radius/mass
     r0_p = 1e-5
     m0_p = (4 * pi / 3) * r0_p**3 * eps_c_p
-    solutions = solve_ivp(
+    solutions: TovSolutions = solve_ivp(
         fun=dimensionless_tov_rhs,
         t_span=(r0_p, 100),
         y0=(p_c_p, m0_p),
@@ -125,23 +125,9 @@ def solve_dimensionless_tov(
         rtol=1e-6,
         atol=1e-8,
     )
-    r_surface_p = None
-    m_surface_p = None
-    # Termination Event Occured
-    if solutions.status == 1:
-        r_surface_p = solutions.t_events[0][0]
-        m_surface_p = solutions.y_events[0][0][1]
-    else:
-        r_surface_p = solutions.t[-1]
-        m_surface_p = solutions.y[1][-1]
-
+    r_surface_p, m_surface_p = get_mr_from_solutions(solutions)
     # Convert scaling constant to SI units so it matches G.
-    eps0_SI = eps0_phys * ScalingConstants.MEV_FM3_TO_J_M3
-    a = c**2 / np.sqrt(G * eps0_SI)
-    b = c**4 / np.sqrt(G**3 * eps0_SI)
-    r_km = (a * r_surface_p) / 1000
-    m_msun = (b * m_surface_p) / ScalingConstants.M_SUN_IN_KG
-    return (r_km, m_msun)
+    return convert_mr_dimensionless_to_physical(r_surface_p, m_surface_p)
 
 
 def generate_mass_radius_curve(

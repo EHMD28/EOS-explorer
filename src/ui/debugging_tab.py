@@ -1,9 +1,8 @@
-from matplotlib import pyplot as plt
 import streamlit as st
 
 from app_constants import DebugConstants, ScalingConstants, StreamlitKeys
 from tov.dimensionless import pressure_nu, pressure_prime
-from tov.solver import TOV_Solutions, solve_dimensionless_tov
+from tov.solver import solve_dimensionless_tov
 from eos.polytropic import eos_eps as polytropic_eos_eps
 
 
@@ -50,40 +49,28 @@ def draw_ui_for_pressure_density_conversion():
     st.text(f"Pressure or Energy Density [MeV/fm^3]: {p_eps_nu:e}")
 
 
-def draw_solver_fig(solutions: TOV_Solutions):
-    st.text(f"Total Radius: {solutions.total_radius} km")
-    st.text(f"Total Mass: {solutions.total_mass} M_sun")
-    # TODO: Move to plotting.py
-    # fig, ax = plt.subplots()
-    # ax.plot(
-    #     solutions.solver_df["r_prime"],
-    #     solutions.solver_df["p_prime"],
-    #     color="red",
-    #     label="Pressure",
-    # )
-    # ax.plot(
-    #     solutions.solver_df["r_prime"],
-    #     solutions.solver_df["m_prime"],
-    #     color="blue",
-    #     label="Mass",
-    # )
-    # ax.legend()
-    # ax.set_xscale("log")
-    # ax.set_yscale("log")
-    # st.pyplot(fig)
+# def draw_solver_fig(solutions: TOV_Solutions):
+#     st.text(f"Total Radius: {solutions.total_radius} km")
+#     st.text(f"Total Mass: {solutions.total_mass} M_sun")
 
 
 def draw_ui_for_tov_solver():
     st.markdown("## TOV Solver")
     p_c = st.number_input("Central Pressure [MeV/fm^3]", value=150, format="%e")
+    dbg_kappa = st.number_input(
+        "Debug Kappa", value=DebugConstants.MID_DENSITY_KAPPA, format="%e"
+    )
+    dbg_gamma = st.number_input(
+        "Debug Gamma", value=DebugConstants.MID_DENSITY_GAMMA, format="%e"
+    )
     radius_km, mass_msun = solve_dimensionless_tov(
         p_c,
         eos_eps_nu_fn=lambda p: polytropic_eos_eps(
             p,
-            kappa=DebugConstants.MID_DENSITY_KAPPA,
-            gamma=DebugConstants.MID_DENSITY_GAMMA,
+            dbg_kappa,
+            dbg_gamma,
         ),  #
-    )  # TODO: Change this
+    )
     st.text(f"Radius: {radius_km} km")
     st.text(f"Mass: {mass_msun} M_sun")
 
