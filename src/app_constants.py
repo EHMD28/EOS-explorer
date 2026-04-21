@@ -31,11 +31,16 @@ class StreamlitKeys:
     Keys to use with Streamlit's session state API.
     """
 
-    # Pressure (in natural units) input
+    # ----- EoS Tab -----
+    ENERGY_DENSITY_SLIDER = "energy-density-slider"
+    PRESSURE_SLIDER = "pressure-slider"
+    EOS_FILE_UPLOAD_WIDGET = "eos-file-upload-widget"
+    MR_FILE_UPLOAD_WIDGET = "mass-radius-file-upload-widget"
+    POLYTROPIC_EOS_KAPPA_INPUT = "polytropic-eos-kappa-input"
+    POLYTROPIC_EOS_GAMMA_INPUT = "polytropic-eos-gamma-input"
+
+    # ----- Debugging Tab -----
     PRESSURE_NU_INPUT = "pressure-input-natural-units"
-    # Pressure (in natural units) output value
     PRESSURE_NU_OUTPUT = "pressure-output-natural-units"
-    # Pressure (dimensionless) input
     PRESSURE_PRIME_INPUT = "pressure-input-dimensionless"
-    # Pressure (dimensionless) output value
     PRESSURE_PRIME_OUTPUT = "pressure-output-dimensionless"

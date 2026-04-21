@@ -10,10 +10,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from app_constants import DebugConstants
+from app_constants import DebugConstants, StreamlitKeys
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
-from eos.tabulated import load_mr_curve_from_file
+from eos.tabulated import load_eos_from_file, load_mr_curve_from_file
+from tov.dimensionless import pressure_nu
 from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
 EOS_OPTIONS_TYPE = Literal["Polytropic", "Tabulated", "Speed-of-Sound Interpolation"]
@@ -60,66 +61,69 @@ def draw_info_for_polytropic_eos():
     )
 
 
-def draw_and_get_parameters_for_polytropic_eos() -> tuple[float, float]:
+def draw_polytropic_parameters_inputs():
     """
     Write the parameter sliders to the UI. Returns a tuple containing the chosen
     values of the parameters in the form (kappa, gamma).
     """
     st.markdown("# Parameters ")
-    kappa = st.number_input(
+    st.number_input(
         label="K - Proportionality Constant",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
         value=DebugConstants.MID_DENSITY_KAPPA,  # TODO: Change to a reasonable default
         format="%e",
+        key=StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT,
     )
-    gamma = st.number_input(
+    st.number_input(
         label="𝛾 - Stiffness Value",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-1.0,
         max_value=10.0,
         value=DebugConstants.MID_DENSITY_GAMMA,  # TODO: Change to a reasonable default
         format="%.10f",
+        key=StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT,
     )
-    return (kappa, gamma)
 
 
-def draw_and_get_density_range_for_polytropic_eos() -> tuple[float, float]:
+def draw_density_range_slider():
     """
     Write the energy density range slider to the UI. Returns a tuple containing
     the chosen range of energy density order of magnitude values.
     """
-    eps_start, eps_end = st.slider(
+    st.slider(
         label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=10,
         value=(-5, 5),
+        key=StreamlitKeys.ENERGY_DENSITY_SLIDER,
     )
-    return (eps_start, eps_end)
 
 
-def draw_and_get_eos_data_from_upload() -> tuple[list[float], list[float]] | None:
+def draw_eos_file_upload_widget() -> tuple[list[float], list[float]] | None:
     """
     Write the EoS file upload option to the UI. Returns a tuple of the form
     (densities, pressure) if a file of the correct format was uploaded, otherwise
     None.
     """
-    uploaded_file = st.file_uploader(
-        label="Choose an EoS data file", type=["txt", "csv", "tsv"]
+    st.file_uploader(
+        label="Choose an EoS data file",
+        type=["txt", "csv", "tsv"],
+        key=StreamlitKeys.EOS_FILE_UPLOAD_WIDGET,
     )
-    # TODO: Move to appropriate file
-    if uploaded_file is not None:
-        df = pd.read_csv(
-            uploaded_file, sep=None, header="infer", comment="#", engine="python"
-        )
-        header = df.columns.values.tolist()
-        if "p" in header and "e" in header:
-            pressures = df["p"]
-            densities = df["e"]
-            return (densities.tolist(), pressures.tolist())
-    return None
+    # # TODO: Move to appropriate file
+    # if uploaded_file is not None:
+    #     df = pd.read_csv(
+    #         uploaded_file, sep=None, header="infer", comment="#", engine="python"
+    #     )
+    #     header = df.columns.values.tolist()
+    #     if "p" in header and "e" in header:
+    #         pressures = df["p"]
+    #         densities = df["e"]
+    #         return (densities.tolist(), pressures.tolist())
+    # return None
 
 
 def draw_polytropic_eos_plot(
@@ -155,20 +159,20 @@ def draw_polytropic_eos_plot(
 # -------------------- General UI --------------------
 
 
-def draw_and_get_pressure_range() -> tuple[float, float]:
+def draw_central_pressure_slider():
     """
     Write the pressure range slider to the UI. Returns a tuple containing
     the chosen orders of magnitude for pressure [MeV/fm^3] in the form
     (start, end).
     """
-    p_start, p_end = st.slider(
+    st.slider(
         label=r"$P$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=20,
         value=(0, 4),
+        key=StreamlitKeys.PRESSURE_SLIDER,
     )
-    return (p_start, p_end)
 
 
 def draw_mass_radius_curve(
@@ -203,11 +207,16 @@ def draw_ui_for_polytropic_eos():
     draw_info_for_polytropic_eos()
     col_one, col_two = st.columns(spec=[0.4, 0.6])
     with col_one:
-        kappa, gamma = draw_and_get_parameters_for_polytropic_eos()
-        eps_start, eps_end = draw_and_get_density_range_for_polytropic_eos()
-        data = draw_and_get_eos_data_from_upload()
-        densities, pressures = data if data is not None else (None, None)
+        draw_polytropic_parameters_inputs()
+        draw_density_range_slider()
+        draw_eos_file_upload_widget()
     with col_two:
+        kappa = st.session_state[StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT]
+        gamma = st.session_state[StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT]
+        eps_start, eps_end = st.session_state[StreamlitKeys.ENERGY_DENSITY_SLIDER]
+        eos_file = st.session_state[StreamlitKeys.EOS_FILE_UPLOAD_WIDGET]
+        eos_data = load_eos_from_file(eos_file) if eos_file is not None else None
+        densities, pressures = eos_data if eos_data is not None else (None, None)
         draw_polytropic_eos_plot(
             kappa,
             gamma,
@@ -224,29 +233,27 @@ def draw_ui_for_soc_eos():
     st.text("Work In Progress")
 
 
-def draw_and_get_mr_data_from_upload() -> tuple[list[float], list[float]] | None:
+def draw_mr_file_upload_widget():
     """
     Write the mass-radius curve file upload option to the UI. Returns a tuple of
     the form (radii, masses) if a file of the correct format was uploaded, otherwise
     None.
     """
-    uploaded_file = st.file_uploader(
-        label="Choose a mass-radius data file", type=["txt", "csv", "tsv"]
+    st.file_uploader(
+        label="Choose a mass-radius data file",
+        type=["txt", "csv", "tsv"],
+        key=StreamlitKeys.MR_FILE_UPLOAD_WIDGET,
     )
-    if uploaded_file is not None:
-        return load_mr_curve_from_file(uploaded_file)  # pyright: ignore[reportArgumentType]
-    else:
-        return None
 
 
 def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE):
-    p_start, p_end = draw_and_get_pressure_range()
+    draw_central_pressure_slider()
+    p_start, p_end = st.session_state[StreamlitKeys.PRESSURE_SLIDER]
     radii, masses = generate_mass_radius_curve(
         p_c_magnitude_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
     )
-    data = draw_and_get_mr_data_from_upload()
-    if data is not None:
-        tabulated_radii, tabulated_masses = data
-        draw_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
-    else:
-        draw_mass_radius_curve(radii, masses)
+    draw_mr_file_upload_widget()
+    mr_file = st.session_state[StreamlitKeys.MR_FILE_UPLOAD_WIDGET]
+    mr_data = load_mr_curve_from_file(mr_file) if mr_file is not None else None
+    tabulated_radii, tabulated_masses = mr_data if mr_data is not None else (None, None)
+    draw_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
