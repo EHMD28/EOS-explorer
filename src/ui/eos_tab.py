@@ -7,35 +7,21 @@ from typing import Literal
 
 from matplotlib import pyplot as plt
 import numpy as np
-import pandas as pd
 import streamlit as st
 
-from app_constants import DebugConstants, StreamlitKeys
+from app_constants import DebugConstants, StreamlitKeys, UiConstants
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
-from eos.tabulated import load_eos_from_file, load_mr_curve_from_file
-from tov.dimensionless import pressure_nu
+from eos.tabulated import (
+    LogarithmicInterpolator,
+    load_eos_from_file,
+    load_mr_curve_from_file,
+)
 from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
+# -------------------- Types --------------------
+
 EOS_OPTIONS_TYPE = Literal["Polytropic", "Tabulated", "Speed-of-Sound Interpolation"]
-
-
-def draw_and_get_eos_dropdown() -> EOS_OPTIONS_TYPE:
-    """
-    Write EoS selection dropdown to the UI and get the selected option.
-    """
-    valid_options = typing.get_args(EOS_OPTIONS_TYPE)
-    # The pyright ignore statement is because Streamlit's return type isn't
-    # technically correct.
-    option: EOS_OPTIONS_TYPE = st.selectbox("Choose an EoS", valid_options)  # pyright: ignore[reportAssignmentType]
-    return option
-
-
-# -------------------- Tabulated Equation of State --------------------
-
-
-def draw_ui_for_tabulated_eos(): ...
-
 
 # -------------------- Polytropic Equation of State --------------------
 
@@ -66,7 +52,7 @@ def draw_polytropic_parameters_inputs():
     Write the parameter sliders to the UI. Returns a tuple containing the chosen
     values of the parameters in the form (kappa, gamma).
     """
-    st.markdown("# Parameters ")
+    st.markdown("## Parameters ")
     st.number_input(
         label="K - Proportionality Constant",
         # Min and max value are arbitary. Might change/remove them later.
@@ -113,17 +99,6 @@ def draw_eos_file_upload_widget() -> tuple[list[float], list[float]] | None:
         type=["txt", "csv", "tsv"],
         key=StreamlitKeys.EOS_FILE_UPLOAD_WIDGET,
     )
-    # # TODO: Move to appropriate file
-    # if uploaded_file is not None:
-    #     df = pd.read_csv(
-    #         uploaded_file, sep=None, header="infer", comment="#", engine="python"
-    #     )
-    #     header = df.columns.values.tolist()
-    #     if "p" in header and "e" in header:
-    #         pressures = df["p"]
-    #         densities = df["e"]
-    #         return (densities.tolist(), pressures.tolist())
-    # return None
 
 
 def draw_polytropic_eos_plot(
@@ -156,7 +131,48 @@ def draw_polytropic_eos_plot(
     st.pyplot(fig)
 
 
-# -------------------- General UI --------------------
+# -------------------- Tabulated Equation of State --------------------
+
+
+def draw_info_for_tabulated_eos():
+    st.markdown("# Tabulated Equation of State")
+    st.text(
+        "The values used to generate the mass-radius curve are interpolated directly from a tabulated EoS file. "
+    )
+
+
+def draw_tabulated_eos_plot():
+    fig, ax = plt.subplots()
+    ax.set_title("Pressure vs. Energy Density")
+    ax.set_xlabel("Energy Density [MeV/fm^3]")
+    ax.set_xscale("log")
+    ax.set_ylabel("Pressure [MeV/fm^3]")
+    ax.set_yscale("log")
+    eos_file = st.session_state[StreamlitKeys.EOS_FILE_UPLOAD_WIDGET]
+    eos_data = load_eos_from_file(eos_file) if eos_file is not None else None
+    if eos_data is not None:
+        tabulated_densities, tabulated_pressures = eos_data
+        ax.scatter(
+            tabulated_densities,
+            tabulated_pressures,
+            color="blue",
+            label="Tabulated EoS",
+        )
+        log_interpolator = LogarithmicInterpolator(
+            x_values=tabulated_densities, y_values=tabulated_pressures
+        )
+        x_min = min(tabulated_densities)
+        x_max = max(tabulated_densities)
+        x_values = np.geomspace(x_min, x_max, num=100)
+        y_values = log_interpolator.get_y(x_values)
+        ax.plot(x_values, y_values, color="red", label="Interpolated")
+        ax.legend()
+    _, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
+    with plot_col:
+        st.pyplot(fig)
+
+
+# -------------------- Mass-Radius Curve --------------------
 
 
 def draw_central_pressure_slider():
@@ -195,9 +211,58 @@ def draw_mass_radius_curve(
         ax.scatter(tabulated_radii, tabulated_masses, color="orange", label="Tabulated")
     ax.scatter(radii, masses, color="blue", label="TOV Solver")
     ax.legend()
-    left_margin, plot_col, right_margin = st.columns([1, 3, 1])
+    _, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
     with plot_col:
         st.pyplot(fig)
+
+
+def draw_mr_file_upload_widget():
+    """
+    Write the mass-radius curve file upload option to the UI. Returns a tuple of
+    the form (radii, masses) if a file of the correct format was uploaded, otherwise
+    None.
+    """
+    st.file_uploader(
+        label="Choose a mass-radius data file",
+        type=["txt", "csv", "tsv"],
+        key=StreamlitKeys.MR_FILE_UPLOAD_WIDGET,
+    )
+
+
+def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = False):
+    st.markdown("## Mass-Radius Curve")
+    draw_central_pressure_slider()
+    draw_mr_file_upload_widget()
+    mr_file = st.session_state[StreamlitKeys.MR_FILE_UPLOAD_WIDGET]
+    mr_data = load_mr_curve_from_file(mr_file) if mr_file is not None else None
+    tabulated_radii, tabulated_masses = mr_data if mr_data is not None else (None, None)
+    p_start, p_end = st.session_state[StreamlitKeys.PRESSURE_SLIDER]
+    if not is_blank:
+        radii, masses = generate_mass_radius_curve(
+            p_c_magnitude_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
+        )
+        draw_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
+    else:
+        draw_mass_radius_curve(
+            radii=[],
+            masses=[],
+            tabulated_radii=tabulated_radii,
+            tabulated_masses=tabulated_masses,
+        )
+
+
+# -------------------- General UI --------------------
+
+
+def draw_and_get_eos_dropdown() -> EOS_OPTIONS_TYPE:
+    """
+    Write EoS selection dropdown to the UI and get the selected option.
+    """
+    valid_options = typing.get_args(EOS_OPTIONS_TYPE)
+    # The pyright ignore statement is because Streamlit's return type isn't
+    # technically correct.
+    option: EOS_OPTIONS_TYPE = st.selectbox("Choose an EoS", valid_options)  # pyright: ignore[reportAssignmentType]
+    return option
 
 
 def draw_ui_for_polytropic_eos():
@@ -229,31 +294,23 @@ def draw_ui_for_polytropic_eos():
     )
 
 
+def draw_ui_for_tabulated_eos():
+    draw_info_for_tabulated_eos()
+    draw_eos_file_upload_widget()
+    draw_tabulated_eos_plot()
+    eos_file = st.session_state[StreamlitKeys.EOS_FILE_UPLOAD_WIDGET]
+    if eos_file is not None:
+        eos_file.seek(0)
+        eos_data = load_eos_from_file(eos_file)
+        if eos_data is not None:
+            densities, pressure = eos_data
+            log_interpolator = LogarithmicInterpolator(
+                x_values=pressure, y_values=densities
+            )
+            draw_ui_for_mass_radius_curve(lambda p: log_interpolator.get_y(p))
+    else:
+        draw_ui_for_mass_radius_curve(lambda _: 0.0, is_blank=True)
+
+
 def draw_ui_for_soc_eos():
     st.text("Work In Progress")
-
-
-def draw_mr_file_upload_widget():
-    """
-    Write the mass-radius curve file upload option to the UI. Returns a tuple of
-    the form (radii, masses) if a file of the correct format was uploaded, otherwise
-    None.
-    """
-    st.file_uploader(
-        label="Choose a mass-radius data file",
-        type=["txt", "csv", "tsv"],
-        key=StreamlitKeys.MR_FILE_UPLOAD_WIDGET,
-    )
-
-
-def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE):
-    draw_central_pressure_slider()
-    p_start, p_end = st.session_state[StreamlitKeys.PRESSURE_SLIDER]
-    radii, masses = generate_mass_radius_curve(
-        p_c_magnitude_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
-    )
-    draw_mr_file_upload_widget()
-    mr_file = st.session_state[StreamlitKeys.MR_FILE_UPLOAD_WIDGET]
-    mr_data = load_mr_curve_from_file(mr_file) if mr_file is not None else None
-    tabulated_radii, tabulated_masses = mr_data if mr_data is not None else (None, None)
-    draw_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)

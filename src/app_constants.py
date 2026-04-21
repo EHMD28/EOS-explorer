@@ -44,3 +44,8 @@ class StreamlitKeys:
     PRESSURE_NU_OUTPUT = "pressure-output-natural-units"
     PRESSURE_PRIME_INPUT = "pressure-input-dimensionless"
     PRESSURE_PRIME_OUTPUT = "pressure-output-dimensionless"
+
+
+class UiConstants:
+    # The middle column is three times the width of the margin columns.
+    CENTERED_WITH_MARGINS_SPEC = [1, 3, 1]

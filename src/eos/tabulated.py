@@ -2,13 +2,14 @@
 Tabulated EoS handling.
 """
 
+import csv
 from typing import TextIO
 
 import numpy as np
 import pandas as pd
 
 
-class LogInterpolator:
+class LogarithmicInterpolator:
     """
     A wrapper around NumPy's `interp` function designed for handling data that
     spans multiple orders of magntidue. Internally, the class converts
