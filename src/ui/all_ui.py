@@ -3,6 +3,7 @@ from ui.eos_tab import (
     draw_and_get_eos_dropdown,
     draw_ui_for_polytropic_eos,
     draw_ui_for_soc_eos,
+    draw_ui_for_tabulated_eos,
 )
 
 import streamlit as st
@@ -19,6 +20,8 @@ def draw_ui():
         match eos_dropdown:
             case "Polytropic":
                 draw_ui_for_polytropic_eos()
+            case "Tabulated":
+                draw_ui_for_tabulated_eos()
             case "Speed-of-Sound Interpolation":
                 draw_ui_for_soc_eos()
     with debug_tab:

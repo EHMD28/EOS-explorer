@@ -16,7 +16,7 @@ from eos.polytropic import eos_p as polytropic_eos_p
 from eos.tabulated import load_mr_curve_from_file
 from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
-EOS_OPTIONS_TYPE = Literal["Polytropic", "Speed-of-Sound Interpolation"]
+EOS_OPTIONS_TYPE = Literal["Polytropic", "Tabulated", "Speed-of-Sound Interpolation"]
 
 
 def draw_and_get_eos_dropdown() -> EOS_OPTIONS_TYPE:
@@ -28,6 +28,12 @@ def draw_and_get_eos_dropdown() -> EOS_OPTIONS_TYPE:
     # technically correct.
     option: EOS_OPTIONS_TYPE = st.selectbox("Choose an EoS", valid_options)  # pyright: ignore[reportAssignmentType]
     return option
+
+
+# -------------------- Tabulated Equation of State --------------------
+
+
+def draw_ui_for_tabulated_eos(): ...
 
 
 # -------------------- Polytropic Equation of State --------------------
