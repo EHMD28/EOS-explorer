@@ -1,8 +1,8 @@
 # TOV Solver
 
-- [ ] Add TOV solver code (possibly hold data in `pd.Dataframe`)
-- [ ] Verify that solver works
-- [ ] Compare EoS to tabulated EoS from CompOse
+- [x] Add TOV solver code (possibly hold data in `pd.Dataframe`)
+- [x] Verify that solver works
+- [x] Compare EoS to tabulated EoS from CompOse
 - [ ] Find and apply constraints
 
 # User Interface
@@ -14,12 +14,12 @@
         - [x] sine wave: A sin(Bx - C)
         - [x] parabola: Ax^2 + Bx + C
 - [x] Add tunable, polytropic EoS to UI.
-- [ ] Plot mass-radius curve
+- [x] Plot mass-radius curve
 - [x] Plot EoS graph
-- [ ] Debugging tab
+- [x] Debugging tab
     - [x] Convert betewen dimensionless and dimensional values
-    - [ ] Run TOV for specific central pressure
-        - [ ] Plot pressure and mass of star vs radius.
+    - [x] Run TOV for specific central pressure
+        - [x] Plot pressure and mass of star vs radius.
 
 # Math
 
