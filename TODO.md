@@ -1,6 +1,6 @@
 # TOV Solver
 
-- [x] Add TOV solver code (possibly hold data in `pd.Dataframe`)
+- [x] Add TOV solver code
 - [x] Verify that solver works
 - [x] Compare EoS to tabulated EoS from CompOse
 - [ ] Find and apply constraints
@@ -20,6 +20,8 @@
     - [x] Convert betewen dimensionless and dimensional values
     - [x] Run TOV for specific central pressure
         - [x] Plot pressure and mass of star vs radius.
+- [ ] Add a radius slider
+- [ ] Allow user to download computed MR and EoS data
 
 # Math
 
