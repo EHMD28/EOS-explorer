@@ -155,7 +155,7 @@ def draw_tabulated_eos_plot():
         ax.scatter(
             tabulated_densities,
             tabulated_pressures,
-            color="blue",
+            color="orange",
             label="Tabulated EoS",
         )
         log_interpolator = LogarithmicInterpolator(
@@ -165,7 +165,7 @@ def draw_tabulated_eos_plot():
         x_max = max(tabulated_densities)
         x_values = np.geomspace(x_min, x_max, num=100)
         y_values = log_interpolator.get_y(x_values)
-        ax.plot(x_values, y_values, color="red", label="Interpolated")
+        ax.plot(x_values, y_values, color="blue", label="Interpolated")
         ax.legend()
     _, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
     with plot_col:
@@ -205,11 +205,13 @@ def draw_mass_radius_curve(
     fig, ax = plt.subplots()
     ax.set_title("Mass-Radius Curve")
     ax.set_xlabel("Radius [km]")
-    ax.set_xscale("log")
-    ax.set_ylabel("Mass [M_sun]")
+    # ax.set_xscale("log")
+    ax.set_ylabel(r"Mass [M$_\odot$]")
     if tabulated_radii is not None and tabulated_masses is not None:
         ax.scatter(tabulated_radii, tabulated_masses, color="orange", label="Tabulated")
-    ax.scatter(radii, masses, color="blue", label="TOV Solver")
+    ax.plot(radii, masses, color="blue", label="TOV Solver")
+    # TODO: Add radius-limiting slider.
+    ax.set_xlim(8, 18)
     ax.legend()
     _, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
     with plot_col:
