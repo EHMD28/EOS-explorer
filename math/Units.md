@@ -2,9 +2,10 @@
 
 ## System of Units
 
-- Length: Kilometers ($km$)
-- Mass: Solar Masses ($M_\odot$)
-- Time: Seconds ($s$)
+- Length: Kilometers (km)
+- Mass: Solar Masses (M$_\odot$)
+- Time: Seconds (s)
+- Energy Density/Pressure: Megaelectronvolts per cubic femtometer (MeV $\cdot$ fm<sup>3</sup>)
 
 ## Relativistic Units
 
@@ -19,67 +20,54 @@ where $L$ is a unit of length and $T$ is a unit of time. To convert an meters-ki
 $$ c = 1 = 2.99792458 \times 10^8 \space m \cdot s^{-1} $$
 $$ 1 \space s = 2.99792458 \times 10^8 \space m $$
 
-### Time Conversion Factor
+## Radius Scaling
 
-Since the unit of length for this project is kilometers, I'm instead using the following conversion factor.
+The relativistic, dimensionless scaling for radius is ([see TOV.md](TOV.md#dimensionless-tov-equation))
 
-$$ 1 \space s = 2.99792458 \times 10^8 \space m $$
-$$ 1 \space s = 2.99792458 \times 10^5 \space (10^3 \space m) $$
-$$ 1 \space s = 2.99792458 \times 10^5 \space km $$
+$$ r = a \cdot r'$$
+$$ [r] = [a] \cdot [r'] $$
 
-## Energy Density Conversion Factor
+Since $r'$ is dimensionless, $[r'] = 1$. Thus, $[r]=[a]$
 
-Though the user interface has energy density and pressure in terms of $MeV \cdot fm^{-3}$, the solver expects [different units](#system-of-units). To accomodate this, it's necessary to convert to to $M_\odot \cdot km^-3$.
+$$ a = (G \cdot \varepsilon_0)^{-1/2} $$
+$$ a = G^{-1/2} \cdot \varepsilon_0^{-1/2} $$
+$$ [a] = [G]^{-1/2} \cdot [\varepsilon_0]^{-1/2} $$
 
-First, start with energy in terms of SI units.
+$[G] = L^3 \cdot M^{-1} \cdot T^{-2}$ and
+$[\varepsilon_0] = L^{-1} \cdot M \cdot T^{-2}$
 
-$$ 1 \space J = 1 \space kg \space m^2 \space s^{-2} $$
+$$ [a]= (L^3 \cdot M^{-1} \cdot T^{-2})^{-1/2} \cdot (L^{-1} \cdot M \cdot T^{-2})^{-1/2} $$
+$$ [a] = L^{-3/2} \cdot M^{1/2} \cdot T \cdot L^{1/2} \cdot M^{-1/2} \cdot T $$
+$$ [a] =  L^{-1} \cdot T^{2} $$
 
-Find 1 $kg$ in terms of $M_\odot$.
+Since a has the same dimension as radius, it should be a unit of length ($[a] = L$). However
 
-$$ 1 \space M_\odot = 1.988416 \times 10^{30} \space kg $$
-$$ 1 \space kg = 5.02912871 \times 10^{-31} \space M_\odot $$
+$$[a] = L \cdot (L^{-2} \cdot T^2) $$
 
-Find 1 $m$ in terms of $km$.
+For $a$ to represent a physical quantity, it must be multiplied by a quantity with a dimension of $L^2 \cdot T^{-2}$. In this case, that quantity is $c$, specifically $c^2$ (since that's what everything is scaled by).
 
-$$ 1 \space km = 10^3 \space m $$
-$$ 1 \space m = 10^{-3} \space km $$ 
+$$ r_{rel} = a_{rel} \cdot r'$$
+$$ r_{phys} = r_{rel} \cdot c^2$$
 
-Using [time conversion factor](#time-conversion-factor), plug into the formula for a joule.
+## Mass Rescaling
 
-$$ 1 \space J = (5.02912871 \times 10^{-31} \space M_\odot) \cdot (10^{-3} \space km)^2 \cdot (2.99792458 \times 10^5 \space km)^{-2} $$
-$$ 1 \space J = 5.59566034 \times 10^{-48} \space M_\odot $$
+The process for rescaling mass is almost identical to the process for [rescaling radius](#radius-scaling).
 
-Given the [conversion factor](https://en.wikipedia.org/wiki/Electronvolt) between electronvolts and joules
+$$ m_r = b \cdot m_r' $$
+$$ [m_r] = [b] $$
 
-$$ 1 \space eV = 1.602176634 \times 10^{-19} \space J $$
-$$ 1 \space J = 6.241509074 \times 10^{18} \space eV $$
+By definition
 
-Therefore 
+$$ b = (G^3 \cdot \varepsilon_0)^{-1/2} $$
+$$ b = G^{-3/2} \cdot \varepsilon_0^{-1/2} $$
 
-$$ 6.241509074 \times 10^{18} \space eV = 5.59566034 \times 10^{-48} \space M_\odot $$
-$$ 1 \space eV = 8.96523625 \times 10^{-67} \space M_\odot $$
-$$ 10^{-6} \space MeV = 8.96523625 \times 10^{-67} \space M_\odot $$
-$$ 1 \space MeV = 8.96523625 \times 10^{-61} \space M_\odot $$
+Therefore
 
-Next, find $km$ in terms of $fm$
+$$ [b] = (L^3 \cdot M^{-1} \cdot T^{-2})^{-3/2} \cdot (L^{-1} \cdot M \cdot T^{-2})^{-1/2}$$
+$$ [b] = L^{-9/2} \cdot M^{3/2} \cdot T^{3} \cdot L^{1/2} \cdot M^{-1/2} \cdot T $$
+$$ [b] = L^{-4} \cdot M \cdot T^4  $$
 
-$$ 1 \space m = 10^{15} \space fm = 10^{-3} \space km $$
-$$ 1 \space fm = 10^{-18} \space km $$
-$$ 1 \space fm^3 = 10^{-54} \space km^3 $$
+$b$ should have a dimension of mass, so it must be multiplied by $c^4$.
 
-Now, combine these two equations
-
-$$ 1 \space \frac{MeV}{fm^3} = \frac{8.96523625 \times 10^{-61} \space M_\odot}{10^{-54} \space km^3} $$
-$$ 1 \space \frac{MeV}{fm^3} = 8.96523625 \times 10^{-7} \space \frac{M_\odot}{km^3} $$
-
-This gives the conversion factor beteween $MeV \cdot fm^{-3}$ and $M_\odot \cdot km^{-3}$
-
-## Gravitational Constant
-
-Starting from non-relativistic units ([source](https://en.wikipedia.org/wiki/Gravitational_constant)):
-
-$$ G = 1.3271244002 \times 10^{11} \space \frac{km^3}{M_\odot \cdot s^2} $$
-$$ G = 1.3271244002 \times 10^{11} \space \frac{km^3}{M_\odot \cdot (2.99792458 \times 10^5 \space km)^2} $$
-$$ G = \frac{1.3271244002 \times 10^{11}}{2.99792458 \times 10^{10}} \space \frac{km^3}{M_\odot \cdot km^2} $$
-$$ G = 4.426810498 \space \frac{km}{M_\odot} $$
+$$ m_{rel} = b \cdot m_r' $$
+$$ m_{phys} = m_{rel} \cdot c^4 $$

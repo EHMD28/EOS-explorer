@@ -39,7 +39,7 @@ $$ a^3 \cdot \varepsilon_0  = b $$
 These equations hold true for 
 
 $$ a = (G \cdot \varepsilon_0)^{-1/2} $$
-$$ b=  (G^3 \cdot \varepsilon_0)^{-1/2} $$
+$$ b =  (G^3 \cdot \varepsilon_0)^{-1/2} $$
 
 The fully dimensionless TOV equation reads
 
