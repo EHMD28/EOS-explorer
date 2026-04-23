@@ -49,6 +49,8 @@ For $a$ to represent a physical quantity, it must be multiplied by a quantity wi
 $$ r_{rel} = a_{rel} \cdot r'$$
 $$ r_{phys} = r_{rel} \cdot c^2$$
 
+As long as $G$ and $\varepsilon_0$ are using the same system of units, $r_phys$ will be in the base unit of length. For the sake of simplicity, the project just uses SI units. Therefore, $r_phys$ is in units of meters. To conver to kilometers, simply divide by 1000: $r_{km} = r_{phys} \div 1000$.
+
 ## Mass Rescaling
 
 The process for rescaling mass is almost identical to the process for [rescaling radius](#radius-scaling).
@@ -71,3 +73,6 @@ $b$ should have a dimension of mass, so it must be multiplied by $c^4$.
 
 $$ m_{rel} = b \cdot m_r' $$
 $$ m_{phys} = m_{rel} \cdot c^4 $$
+
+As long as $G$ and $\varepsilon_0$ are using the same system of units, $m_phys$ will be in the base unit of mass. For the sake of simplicity, the project just uses SI units. Therefore, $m_phys$ is in units of meters. To conver to solar masses, simply divide by by the [mass of the sun](https://en.wikipedia.org/wiki/Solar_mass). $m_{M \odot} = m_{kg} \div (1.988416 \times 10^{30})$.
+
