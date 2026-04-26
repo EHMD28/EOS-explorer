@@ -10,6 +10,7 @@ import numpy as np
 import streamlit as st
 
 from app_constants import DebugConstants, StreamlitKeys, UiConstants
+from constraints import plot_gw170817_constraints, plot_nicer_constraints
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
 from eos.tabulated import (
@@ -205,14 +206,17 @@ def draw_mass_radius_curve(
     fig, ax = plt.subplots()
     ax.set_title("Mass-Radius Curve")
     ax.set_xlabel("Radius [km]")
-    # ax.set_xscale("log")
     ax.set_ylabel(r"Mass [M$_\odot$]")
+    ax.grid(alpha=0.3)
     if tabulated_radii is not None and tabulated_masses is not None:
         ax.scatter(tabulated_radii, tabulated_masses, color="orange", label="Tabulated")
     ax.plot(radii, masses, color="blue", label="TOV Solver")
+    plot_nicer_constraints(ax)
+    plot_gw170817_constraints(ax)
+    ax.set_ylim(0, 3.5)
     # TODO: Add radius-limiting slider.
-    ax.set_xlim(8, 18)
-    ax.legend()
+    ax.set_xlim(8, 16)
+    ax.legend(loc="upper left", fontsize=8)
     _, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
     with plot_col:
         st.pyplot(fig)

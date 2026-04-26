@@ -90,8 +90,8 @@ def convert_mr_dimensionless_to_physical(r_p: float, m_p: float):
     a = c**2 / np.sqrt(G * eps0_SI)
     b = c**4 / np.sqrt(G**3 * eps0_SI)
     r_km = (a * r_p) / 1000  # meters -> kilometers
-    m_msun = (b * m_p) / ScalingConstants.M_SUN_IN_KG  # kilograms -> solar mass
-    return (r_km, m_msun)
+    m_sol = (b * m_p) / ScalingConstants.M_SUN_IN_KG  # kilograms -> solar mass
+    return (r_km, m_sol)
 
 
 def solve_dimensionless_tov(
@@ -146,7 +146,7 @@ def generate_mass_radius_curve(
     radii = []
     masses = []
     for p_c in p_c_values:
-        radius_km, mass_msun = solve_dimensionless_tov(p_c, eos_eps_fn)
+        radius_km, mass_sol = solve_dimensionless_tov(p_c, eos_eps_fn)
         radii.append(radius_km)
-        masses.append(mass_msun)
+        masses.append(mass_sol)
     return (radii, masses)
