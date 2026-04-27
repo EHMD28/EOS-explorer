@@ -252,7 +252,7 @@ def draw_mass_radius_curve(
     ax.plot(radii, masses, color="blue", label="TOV Solver")
     constraints = get_constraints_from_ui()
     plot_nicer_constraints(ax, constraints)
-    plot_gw170817_constraints(ax)
+    plot_gw170817_constraints(ax, constraints)
     ax.set_ylim(0, 3.5)
     # TODO: Add radius-limiting slider.
     ax.set_xlim(8, 16)

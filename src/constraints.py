@@ -90,16 +90,17 @@ def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
                 )
 
 
-def plot_gw170817_constraints(ax: Axes):
-    for i, comp in enumerate(gw_components):
-        for s in gw_levels:
-            df = load_constraint_region(f"{comp}_{s}")
-            ax.fill(
-                df["R_km"],
-                df["M_solar"],
-                color=gw_color,
-                alpha=alpha_for_level[s],
-                edgecolor=gw_color,
-                linewidth=1.0,
-                label=gw_label_for[s] if (i == 0) else None,
-            )
+def plot_gw170817_constraints(ax: Axes, constraints: ObservationalConstraints):
+    if constraints.show_GW170817:
+        for i, comp in enumerate(gw_components):
+            for s in gw_levels:
+                df = load_constraint_region(f"{comp}_{s}")
+                ax.fill(
+                    df["R_km"],
+                    df["M_solar"],
+                    color=gw_color,
+                    alpha=alpha_for_level[s],
+                    edgecolor=gw_color,
+                    linewidth=1.0,
+                    label=gw_label_for[s] if (i == 0) else None,
+                )
