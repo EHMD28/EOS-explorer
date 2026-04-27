@@ -2,15 +2,19 @@
 All user interface code.
 """
 
+from dataclasses import dataclass
 import typing
-from typing import Literal
 
 from matplotlib import pyplot as plt
 import numpy as np
 import streamlit as st
 
 from app_constants import DebugConstants, StreamlitKeys, UiConstants
-from constraints import plot_gw170817_constraints, plot_nicer_constraints
+from constraints import (
+    ObservationalConstraints,
+    plot_gw170817_constraints,
+    plot_nicer_constraints,
+)
 from eos.polytropic import eos_eps as polytropic_eos_eps
 from eos.polytropic import eos_p as polytropic_eos_p
 from eos.tabulated import (
@@ -22,7 +26,9 @@ from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
 # -------------------- Types --------------------
 
-EOS_OPTIONS_TYPE = Literal["Polytropic", "Tabulated", "Speed-of-Sound Interpolation"]
+EOS_OPTIONS_TYPE = typing.Literal[
+    "Polytropic", "Tabulated", "Speed-of-Sound Interpolation"
+]
 
 # -------------------- Polytropic Equation of State --------------------
 
@@ -192,6 +198,39 @@ def draw_central_pressure_slider():
     )
 
 
+def draw_mr_file_upload_widget():
+    """
+    Write the mass-radius curve file upload option to the UI. Returns a tuple of
+    the form (radii, masses) if a file of the correct format was uploaded, otherwise
+    None.
+    """
+    st.file_uploader(
+        label="Choose a mass-radius data file",
+        type=["txt", "csv", "tsv"],
+        key=StreamlitKeys.MR_FILE_UPLOAD_WIDGET,
+    )
+
+
+def draw_constraint_checkboxes():
+    st.markdown("### Constraints")
+    st.checkbox("J0740", value=True, key=StreamlitKeys.J0740_CHECKBOX)
+    st.checkbox("J0030", value=True, key=StreamlitKeys.J0030_CHECKBOX)
+    st.checkbox("J0437", value=True, key=StreamlitKeys.J0437_CHECKBOX)
+    st.checkbox("J0614", value=True, key=StreamlitKeys.J0614_CHECKBOX)
+    st.checkbox("GW170817", value=True, key=StreamlitKeys.GW170817_CHECKBOX)
+
+
+def get_constraints_from_ui() -> ObservationalConstraints:
+    show_J0740 = st.session_state.get(StreamlitKeys.J0740_CHECKBOX, False)
+    show_J0030 = st.session_state.get(StreamlitKeys.J0030_CHECKBOX, False)
+    show_J0437 = st.session_state.get(StreamlitKeys.J0437_CHECKBOX, False)
+    show_J0614 = st.session_state.get(StreamlitKeys.J0614_CHECKBOX, False)
+    show_GW170817 = st.session_state.get(StreamlitKeys.GW170817_CHECKBOX, False)
+    return ObservationalConstraints(
+        show_J0740, show_J0030, show_J0437, show_J0614, show_GW170817
+    )
+
+
 def draw_mass_radius_curve(
     radii: list[float],
     masses: list[float],
@@ -211,28 +250,18 @@ def draw_mass_radius_curve(
     if tabulated_radii is not None and tabulated_masses is not None:
         ax.scatter(tabulated_radii, tabulated_masses, color="orange", label="Tabulated")
     ax.plot(radii, masses, color="blue", label="TOV Solver")
-    plot_nicer_constraints(ax)
+    constraints = get_constraints_from_ui()
+    plot_nicer_constraints(ax, constraints)
     plot_gw170817_constraints(ax)
     ax.set_ylim(0, 3.5)
     # TODO: Add radius-limiting slider.
     ax.set_xlim(8, 16)
     ax.legend(loc="upper left", fontsize=8)
-    _, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
+    constraints_col, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
+    with constraints_col:
+        draw_constraint_checkboxes()
     with plot_col:
         st.pyplot(fig)
-
-
-def draw_mr_file_upload_widget():
-    """
-    Write the mass-radius curve file upload option to the UI. Returns a tuple of
-    the form (radii, masses) if a file of the correct format was uploaded, otherwise
-    None.
-    """
-    st.file_uploader(
-        label="Choose a mass-radius data file",
-        type=["txt", "csv", "tsv"],
-        key=StreamlitKeys.MR_FILE_UPLOAD_WIDGET,
-    )
 
 
 def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = False):

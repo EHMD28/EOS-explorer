@@ -39,6 +39,13 @@ class StreamlitKeys:
     POLYTROPIC_EOS_KAPPA_INPUT = "polytropic-eos-kappa-input"
     POLYTROPIC_EOS_GAMMA_INPUT = "polytropic-eos-gamma-input"
 
+    ## ----- Observational Constraints -----
+    J0740_CHECKBOX = "J0740-checkbox"
+    J0030_CHECKBOX = "J0030-checkbox"
+    J0437_CHECKBOX = "J0437-checkbox"
+    J0614_CHECKBOX = "J0614-checkbox"
+    GW170817_CHECKBOX = "GW170817-checkbox"
+
     # ----- Debugging Tab -----
     PRESSURE_NU_INPUT = "pressure-input-natural-units"
     PRESSURE_NU_OUTPUT = "pressure-output-natural-units"

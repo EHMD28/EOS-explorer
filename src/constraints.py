@@ -1,12 +1,25 @@
+from dataclasses import dataclass
 import os
+from typing import Literal
 from matplotlib.axes import Axes
 import pandas as pd
-import matplotlib.pyplot as plt
+
+
+@dataclass
+class ObservationalConstraints:
+    show_J0740: bool = False
+    show_J0030: bool = False
+    show_J0437: bool = False
+    show_J0614: bool = False
+    show_GW170817: bool = False
+
 
 DATA = "data/constraints"
 
 # Which pulsars, GW components, and levels to draw ----------------------
-nicer_pulsars = {
+NICER_STEM = Literal["J0740_latest", "J0030", "J0437", "J0614"]
+
+nicer_pulsars: dict[NICER_STEM, str] = {
     "J0740_latest": "PSR J0740+6620",
     "J0030": "PSR J0030+0451",
     "J0437": "PSR J0437-4715",
@@ -23,7 +36,7 @@ gw_components = ["GW_w_mmax_NS1", "GW_w_mmax_NS2"]
 gw_levels = ["90"]
 
 # Styling ---------------------------------------------------------------
-colors = {
+stemp_to_color_map = {
     "J0740_latest": "#d62728",
     "J0030": "#1f77b4",
     "J0437": "#2ca02c",
@@ -50,20 +63,31 @@ def load_constraint_region(name: str):
     return pd.read_csv(os.path.join(DATA, name + ".csv"))
 
 
-def plot_nicer_constraints(ax: Axes):
+def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
     for stem, label in nicer_pulsars.items():
-        c = colors[stem]
-        for s in nicer_sigmas:
-            df = load_constraint_region(f"{stem}_{s}")
-            ax.fill(
-                df["R_km"],
-                df["M_solar"],
-                color=c,
-                alpha=alpha_for_level[s],
-                label=label if s == nicer_sigmas[-1] else None,
-                edgecolor=c,
-                linewidth=1.0,
-            )
+        color = stemp_to_color_map[stem]
+        for sigma in nicer_sigmas:
+            show_region: bool = False
+            match stem:
+                case "J0740_latest":
+                    show_region = constraints.show_J0740
+                case "J0030":
+                    show_region = constraints.show_J0030
+                case "J0437":
+                    show_region = constraints.show_J0437
+                case "J0614":
+                    show_region = constraints.show_J0614
+            if show_region:
+                df = load_constraint_region(f"{stem}_{sigma}")
+                ax.fill(
+                    df["R_km"],
+                    df["M_solar"],
+                    color=color,
+                    alpha=alpha_for_level[sigma],
+                    label=label if sigma == nicer_sigmas[-1] else None,
+                    edgecolor=color,
+                    linewidth=1.0,
+                )
 
 
 def plot_gw170817_constraints(ax: Axes):
