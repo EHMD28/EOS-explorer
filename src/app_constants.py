@@ -56,3 +56,4 @@ class StreamlitKeys:
 class UiConstants:
     # The middle column is three times the width of the margin columns.
     CENTERED_WITH_MARGINS_SPEC = [1, 3, 1]
+    SHOW_CONSTRAINTS_BY_DEFAULT = True

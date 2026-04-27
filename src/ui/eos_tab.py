@@ -213,19 +213,51 @@ def draw_mr_file_upload_widget():
 
 def draw_constraint_checkboxes():
     st.markdown("### Constraints")
-    st.checkbox("J0740", value=True, key=StreamlitKeys.J0740_CHECKBOX)
-    st.checkbox("J0030", value=True, key=StreamlitKeys.J0030_CHECKBOX)
-    st.checkbox("J0437", value=True, key=StreamlitKeys.J0437_CHECKBOX)
-    st.checkbox("J0614", value=True, key=StreamlitKeys.J0614_CHECKBOX)
-    st.checkbox("GW170817", value=True, key=StreamlitKeys.GW170817_CHECKBOX)
+    st.checkbox(
+        "J0740",
+        value=UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT,
+        key=StreamlitKeys.J0740_CHECKBOX,
+    )
+    st.checkbox(
+        "J0030",
+        value=UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT,
+        key=StreamlitKeys.J0030_CHECKBOX,
+    )
+    st.checkbox(
+        "J0437",
+        value=UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT,
+        key=StreamlitKeys.J0437_CHECKBOX,
+    )
+    st.checkbox(
+        "J0614",
+        value=UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT,
+        key=StreamlitKeys.J0614_CHECKBOX,
+    )
+    st.checkbox(
+        "GW170817",
+        value=UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT,
+        key=StreamlitKeys.GW170817_CHECKBOX,
+    )
 
 
 def get_constraints_from_ui() -> ObservationalConstraints:
-    show_J0740 = st.session_state.get(StreamlitKeys.J0740_CHECKBOX, False)
-    show_J0030 = st.session_state.get(StreamlitKeys.J0030_CHECKBOX, False)
-    show_J0437 = st.session_state.get(StreamlitKeys.J0437_CHECKBOX, False)
-    show_J0614 = st.session_state.get(StreamlitKeys.J0614_CHECKBOX, False)
-    show_GW170817 = st.session_state.get(StreamlitKeys.GW170817_CHECKBOX, False)
+    # If any of the checkboxes are uninitialzed, fall back to
+    # `UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT`.
+    show_J0740 = st.session_state.get(
+        StreamlitKeys.J0740_CHECKBOX, UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT
+    )
+    show_J0030 = st.session_state.get(
+        StreamlitKeys.J0030_CHECKBOX, UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT
+    )
+    show_J0437 = st.session_state.get(
+        StreamlitKeys.J0437_CHECKBOX, UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT
+    )
+    show_J0614 = st.session_state.get(
+        StreamlitKeys.J0614_CHECKBOX, UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT
+    )
+    show_GW170817 = st.session_state.get(
+        StreamlitKeys.GW170817_CHECKBOX, UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT
+    )
     return ObservationalConstraints(
         show_J0740, show_J0030, show_J0437, show_J0614, show_GW170817
     )
