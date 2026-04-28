@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 import os
 from typing import Literal
+from unittest import result
 from matplotlib.axes import Axes
 import pandas as pd
+
+# Which pulsars, GW components, and levels to draw ----------------------
+NICER_STEM = Literal["J0740_latest", "J0030", "J0437", "J0614"]
 
 
 @dataclass
@@ -13,11 +17,28 @@ class ObservationalConstraints:
     show_J0614: bool = False
     show_GW170817: bool = False
 
+    def get_value_from_stem(self, stem: NICER_STEM) -> bool:
+        match stem:
+            case "J0740_latest":
+                return self.show_J0740
+            case "J0030":
+                return self.show_J0030
+            case "J0437":
+                return self.show_J0437
+            case "J0614":
+                return self.show_J0614
+
+
+@dataclass
+class ConstraintResults:
+    is_consistent_with_J0740: bool = False
+    is_consistent_with_J0030: bool = False
+    is_consistent_with_J0437: bool = False
+    is_consistent_with_J0614: bool = False
+    is_consistent_with_GW170817: bool = False
+
 
 DATA = "data/constraints"
-
-# Which pulsars, GW components, and levels to draw ----------------------
-NICER_STEM = Literal["J0740_latest", "J0030", "J0437", "J0614"]
 
 nicer_pulsars: dict[NICER_STEM, str] = {
     "J0740_latest": "PSR J0740+6620",
@@ -64,19 +85,14 @@ def load_constraint_region(name: str):
 
 
 def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
+    """
+    Plot the NICER constraints to `ax`. Returns an `ObservationalConstraints`
+    to indicate if each of the observational constraints is being meet.
+    """
     for stem, label in nicer_pulsars.items():
         color = stemp_to_color_map[stem]
         for sigma in nicer_sigmas:
-            show_region: bool = False
-            match stem:
-                case "J0740_latest":
-                    show_region = constraints.show_J0740
-                case "J0030":
-                    show_region = constraints.show_J0030
-                case "J0437":
-                    show_region = constraints.show_J0437
-                case "J0614":
-                    show_region = constraints.show_J0614
+            show_region: bool = constraints.get_value_from_stem(stem)
             if show_region:
                 df = load_constraint_region(f"{stem}_{sigma}")
                 ax.fill(
@@ -104,3 +120,14 @@ def plot_gw170817_constraints(ax: Axes, constraints: ObservationalConstraints):
                     linewidth=1.0,
                     label=gw_label_for[s] if (i == 0) else None,
                 )
+
+
+def apply_constraints(mr_curve: list[tuple[float, float]]) -> ConstraintResults:
+    results = ConstraintResults()
+    for stem, label in nicer_pulsars.items():
+        for sigma in nicer_sigmas:
+            df = load_constraint_region(f"{stem}_{sigma}")
+    for i, comp in enumerate(gw_components):
+        for sigma in gw_levels:
+            df = load_constraint_region(f"{comp}_{sigma}")
+    return results
