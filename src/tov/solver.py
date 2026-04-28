@@ -51,13 +51,9 @@ def dimensionless_tov_rhs(
 
 def surface_event(r, state: tuple[float, float], eos_eps_p_fn):
     """
-    Event for detecting when pressure reaches 0. solve_ivp() detects a zero by
-    looking for a sign change. When the pressure is near 0, but small, this
-    function forces a sign change.
+    Event for detecting when pressure reaches 0.
     """
     p, _ = state
-    # # Force pressure to cross 0, triggering the event.
-    # altered_p = p - 1e-5
     return p
 
 
