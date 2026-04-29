@@ -54,7 +54,7 @@ class ConstraintResults:
     is_consistent_with_GW170817: bool = False
 
 
-OBSERVATIONS_DIR = Path("data/constraints")
+OBSERVATIONS_DIR = Path("data/observations")
 
 NICER_PULSARS: dict[NICER_STEM, str] = {
     "J0740_latest": "PSR J0740+6620",
