@@ -12,6 +12,7 @@ import streamlit as st
 from app_constants import DebugConstants, StreamlitKeys, UiConstants
 from constraints import (
     ObservationalConstraints,
+    get_constraint_results_from_mr_curve,
     plot_gw170817_constraints,
     plot_nicer_constraints,
 )
@@ -240,6 +241,36 @@ def draw_constraint_checkboxes():
     )
 
 
+def draw_constraint_results(radii: list[float], masses: list[float]):
+    mr_points = list(zip(radii, masses))
+    results = get_constraint_results_from_mr_curve(mr_points)
+    # GW170817
+    if results.is_consistent_with_GW170817:
+        st.markdown(":green[GW170817]")
+    else:
+        st.markdown(":red[GW170817]")
+    # J0740
+    if results.is_consistent_with_J0740:
+        st.markdown(":green[J0740]")
+    else:
+        st.markdown(":red[J0740]")
+    # J0030
+    if results.is_consistent_with_J0030:
+        st.markdown(":green[J0030]")
+    else:
+        st.markdown(":red[J0030]")
+    # J0437
+    if results.is_consistent_with_J0437:
+        st.markdown(":green[J0437]")
+    else:
+        st.markdown(":red[J0437]")
+    # J0614
+    if results.is_consistent_with_J0614:
+        st.markdown(":green[J0614]")
+    else:
+        st.markdown(":red[J0614]")
+
+
 def get_constraints_from_ui() -> ObservationalConstraints:
     # If any of the checkboxes are uninitialzed, fall back to
     # `UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT`.
@@ -263,7 +294,7 @@ def get_constraints_from_ui() -> ObservationalConstraints:
     )
 
 
-def draw_mass_radius_curve(
+def draw_mass_radius_curve_and_constraints(
     radii: list[float],
     masses: list[float],
     tabulated_radii: list[float] | None = None,
@@ -292,6 +323,8 @@ def draw_mass_radius_curve(
     constraints_col, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
     with constraints_col:
         draw_constraint_checkboxes()
+        st.divider()
+        draw_constraint_results(radii, masses)
     with plot_col:
         st.pyplot(fig)
 
@@ -308,9 +341,11 @@ def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = 
         radii, masses = generate_mass_radius_curve(
             p_c_magnitude_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
         )
-        draw_mass_radius_curve(radii, masses, tabulated_radii, tabulated_masses)
+        draw_mass_radius_curve_and_constraints(
+            radii, masses, tabulated_radii, tabulated_masses
+        )
     else:
-        draw_mass_radius_curve(
+        draw_mass_radius_curve_and_constraints(
             radii=[],
             masses=[],
             tabulated_radii=tabulated_radii,

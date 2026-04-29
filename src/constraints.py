@@ -1,12 +1,28 @@
 from dataclasses import dataclass
-import os
+from pathlib import Path
 from typing import Literal
-from unittest import result
+from shapely import LineString, Polygon
 from matplotlib.axes import Axes
 import pandas as pd
 
-# Which pulsars, GW components, and levels to draw ----------------------
-NICER_STEM = Literal["J0740_latest", "J0030", "J0437", "J0614"]
+type NICER_STEM = Literal["J0740_latest", "J0030", "J0437", "J0614"]
+type OBSERVATION_LABEL = Literal["J0740_latest", "J0030", "J0437", "J0614", "GW170817"]
+
+
+def get_observation_label_from_path(path: Path) -> OBSERVATION_LABEL:
+    stem = path.stem  # e.g. "J0740_latest_2sigma"
+    if stem.startswith("GW"):
+        return "GW170817"
+    elif stem.startswith("J0740"):
+        return "J0740_latest"
+    elif stem.startswith("J0030"):
+        return "J0030"
+    elif stem.startswith("J0437"):
+        return "J0437"
+    elif stem.startswith("J0614"):
+        return "J0614"
+    else:
+        raise ValueError(f"Invalid Observation File Path: {path}")
 
 
 @dataclass
@@ -38,9 +54,9 @@ class ConstraintResults:
     is_consistent_with_GW170817: bool = False
 
 
-DATA = "data/constraints"
+OBSERVATIONS_DIR = Path("data/constraints")
 
-nicer_pulsars: dict[NICER_STEM, str] = {
+NICER_PULSARS: dict[NICER_STEM, str] = {
     "J0740_latest": "PSR J0740+6620",
     "J0030": "PSR J0030+0451",
     "J0437": "PSR J0437-4715",
@@ -49,30 +65,30 @@ nicer_pulsars: dict[NICER_STEM, str] = {
 
 # Default = 1 sigma only for NICER.
 # For 1/2/3 sigma stack use: ['3sigma','2sigma','1sigma']  (outer to inner).
-nicer_sigmas = ["2sigma"]
+NICER_SIGMAS = ["2sigma"]
 
 # GW170817 default = 90% credible region.
 # Available: '1sigma', '2sigma', '3sigma', '90'.
-gw_components = ["GW_w_mmax_NS1", "GW_w_mmax_NS2"]
-gw_levels = ["90"]
+GW_COMPONENTS = ["GW_w_mmax_NS1", "GW_w_mmax_NS2"]
+GW_SIGMA_LEVELS = ["90"]
 
 # Styling ---------------------------------------------------------------
-stemp_to_color_map = {
+STEM_TO_COLOR_MAP = {
     "J0740_latest": "#d62728",
     "J0030": "#1f77b4",
     "J0437": "#2ca02c",
     "J0614": "#9467bd",
 }
-gw_color = "#7f7f7f"
+GW_COLOR = "#7f7f7f"
 
-alpha_for_level = {
+ALPHA_FOR_LEVEL = {
     "1sigma": 0.55,
     "2sigma": 0.30,
     "3sigma": 0.15,
     "90": 0.35,
 }
 
-gw_label_for = {
+GW_LABEL_FOR = {
     "1sigma": "GW170817 (68%)",
     "2sigma": "GW170817 (95%)",
     "3sigma": "GW170817 (99.7%)",
@@ -80,8 +96,31 @@ gw_label_for = {
 }
 
 
-def load_constraint_region(name: str):
-    return pd.read_csv(os.path.join(DATA, name + ".csv"))
+def get_all_observation_file_paths(
+    include_nicer: bool = True, include_gw: bool = True
+) -> list[Path]:
+    paths: list[Path] = []
+    # Find all NICER observations paths
+    if include_nicer:
+        for stem in NICER_PULSARS.keys():
+            for sigma in NICER_SIGMAS:
+                path = OBSERVATIONS_DIR.joinpath(f"{stem}_{sigma}.csv")
+                paths.append(path)
+    # Find all gravitational-wave observations paths
+    if include_gw:
+        for comp in GW_COMPONENTS:
+            for sigma in GW_SIGMA_LEVELS:
+                path = OBSERVATIONS_DIR.joinpath(f"{comp}_{sigma}.csv")
+                paths.append(path)
+    return paths
+
+
+def get_observation_file_path(stem: str, sigma: str):
+    return OBSERVATIONS_DIR.joinpath(f"{stem}_{sigma}.csv")
+
+
+def load_constraint_region(path: Path):
+    return pd.read_csv(path)
 
 
 def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
@@ -89,18 +128,20 @@ def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
     Plot the NICER constraints to `ax`. Returns an `ObservationalConstraints`
     to indicate if each of the observational constraints is being meet.
     """
-    for stem, label in nicer_pulsars.items():
-        color = stemp_to_color_map[stem]
-        for sigma in nicer_sigmas:
+
+    for stem, label in NICER_PULSARS.items():
+        color = STEM_TO_COLOR_MAP[stem]
+        for sigma in NICER_SIGMAS:
             show_region: bool = constraints.get_value_from_stem(stem)
             if show_region:
-                df = load_constraint_region(f"{stem}_{sigma}")
+                file_path = get_observation_file_path(stem, sigma)
+                df = load_constraint_region(file_path)
                 ax.fill(
                     df["R_km"],
                     df["M_solar"],
                     color=color,
-                    alpha=alpha_for_level[sigma],
-                    label=label if sigma == nicer_sigmas[-1] else None,
+                    alpha=ALPHA_FOR_LEVEL[sigma],
+                    label=label if sigma == NICER_SIGMAS[-1] else None,
                     edgecolor=color,
                     linewidth=1.0,
                 )
@@ -108,26 +149,42 @@ def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
 
 def plot_gw170817_constraints(ax: Axes, constraints: ObservationalConstraints):
     if constraints.show_GW170817:
-        for i, comp in enumerate(gw_components):
-            for s in gw_levels:
-                df = load_constraint_region(f"{comp}_{s}")
+        for i, comp in enumerate(GW_COMPONENTS):
+            for sigma in GW_SIGMA_LEVELS:
+                file_path = get_observation_file_path(comp, sigma)
+                df = load_constraint_region(file_path)
                 ax.fill(
                     df["R_km"],
                     df["M_solar"],
-                    color=gw_color,
-                    alpha=alpha_for_level[s],
-                    edgecolor=gw_color,
+                    color=GW_COLOR,
+                    alpha=ALPHA_FOR_LEVEL[sigma],
+                    edgecolor=GW_COLOR,
                     linewidth=1.0,
-                    label=gw_label_for[s] if (i == 0) else None,
+                    label=GW_LABEL_FOR[sigma] if (i == 0) else None,
                 )
 
 
-def apply_constraints(mr_curve: list[tuple[float, float]]) -> ConstraintResults:
+def get_constraint_results_from_mr_curve(
+    mr_curve_points: list[tuple[float, float]],
+) -> ConstraintResults:
     results = ConstraintResults()
-    for stem, label in nicer_pulsars.items():
-        for sigma in nicer_sigmas:
-            df = load_constraint_region(f"{stem}_{sigma}")
-    for i, comp in enumerate(gw_components):
-        for sigma in gw_levels:
-            df = load_constraint_region(f"{comp}_{sigma}")
+    contours_dict: dict[OBSERVATION_LABEL, Polygon] = {}
+    observation_paths = get_all_observation_file_paths()
+    for path in observation_paths:
+        label = get_observation_label_from_path(path)
+        df = pd.read_csv(path)
+        contour = Polygon(zip(df["R_km"], df["M_solar"]))
+        contours_dict[label] = contour
+    mr_curve = LineString(mr_curve_points)
+    # TODO: Refactor into dictionary
+    if mr_curve.intersects(contours_dict["J0740_latest"]):
+        results.is_consistent_with_J0740 = True
+    if mr_curve.intersects(contours_dict["J0030"]):
+        results.is_consistent_with_J0030 = True
+    if mr_curve.intersects(contours_dict["J0437"]):
+        results.is_consistent_with_J0437 = True
+    if mr_curve.intersects(contours_dict["J0614"]):
+        results.is_consistent_with_J0614 = True
+    if mr_curve.intersects(contours_dict["GW170817"]):
+        results.is_consistent_with_GW170817 = True
     return results
