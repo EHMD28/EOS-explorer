@@ -1,20 +1,31 @@
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypeAlias
+import typing
 from shapely import LineString, Polygon
 from matplotlib.axes import Axes
 import pandas as pd
 
-type NICER_STEM = Literal["J0740_latest", "J0030", "J0437", "J0614"]
-type OBSERVATION_LABEL = Literal["J0740_latest", "J0030", "J0437", "J0614", "GW170817"]
+NICER_STEM: TypeAlias = Literal["J0740_latest", "J0030", "J0437", "J0614"]
+OBSERVATION_LABEL: TypeAlias = Literal["J0740", "J0030", "J0437", "J0614", "GW170817"]
+OBSERVATION_BOOL_MAP: TypeAlias = dict[OBSERVATION_LABEL, bool]
+
+
+def new_observation_bool_map() -> OBSERVATION_BOOL_MAP:
+    return {
+        "J0740": False,
+        "J0030": False,
+        "J0437": False,
+        "J0614": False,
+        "GW170817": False,
+    }
 
 
 def get_observation_label_from_path(path: Path) -> OBSERVATION_LABEL:
-    stem = path.stem  # e.g. "J0740_latest_2sigma"
+    stem = path.stem
     if stem.startswith("GW"):
         return "GW170817"
     elif stem.startswith("J0740"):
-        return "J0740_latest"
+        return "J0740"
     elif stem.startswith("J0030"):
         return "J0030"
     elif stem.startswith("J0437"):
@@ -25,33 +36,20 @@ def get_observation_label_from_path(path: Path) -> OBSERVATION_LABEL:
         raise ValueError(f"Invalid Observation File Path: {path}")
 
 
-@dataclass
-class ObservationalConstraints:
-    show_J0740: bool = False
-    show_J0030: bool = False
-    show_J0437: bool = False
-    show_J0614: bool = False
-    show_GW170817: bool = False
-
-    def get_value_from_stem(self, stem: NICER_STEM) -> bool:
-        match stem:
-            case "J0740_latest":
-                return self.show_J0740
-            case "J0030":
-                return self.show_J0030
-            case "J0437":
-                return self.show_J0437
-            case "J0614":
-                return self.show_J0614
+def get_observation_from_stem(stem: NICER_STEM) -> OBSERVATION_LABEL:
+    match stem:
+        case "J0740_latest":
+            return "J0740"
+        case "J0030":
+            return "J0030"
+        case "J0437":
+            return "J0437"
+        case "J0614":
+            return "J0614"
 
 
-@dataclass
-class ConstraintResults:
-    is_consistent_with_J0740: bool = False
-    is_consistent_with_J0030: bool = False
-    is_consistent_with_J0437: bool = False
-    is_consistent_with_J0614: bool = False
-    is_consistent_with_GW170817: bool = False
+def get_all_observation_labels() -> tuple[OBSERVATION_LABEL]:
+    return typing.get_args(OBSERVATION_LABEL)
 
 
 OBSERVATIONS_DIR = Path("data/observations")
@@ -123,7 +121,7 @@ def load_constraint_region(path: Path):
     return pd.read_csv(path)
 
 
-def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
+def plot_nicer_constraints(ax: Axes, show_observations: OBSERVATION_BOOL_MAP):
     """
     Plot the NICER constraints to `ax`. Returns an `ObservationalConstraints`
     to indicate if each of the observational constraints is being meet.
@@ -132,7 +130,8 @@ def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
     for stem, label in NICER_PULSARS.items():
         color = STEM_TO_COLOR_MAP[stem]
         for sigma in NICER_SIGMAS:
-            show_region: bool = constraints.get_value_from_stem(stem)
+            observation_label = get_observation_from_stem(stem)
+            show_region: bool = show_observations[observation_label]
             if show_region:
                 file_path = get_observation_file_path(stem, sigma)
                 df = load_constraint_region(file_path)
@@ -147,8 +146,8 @@ def plot_nicer_constraints(ax: Axes, constraints: ObservationalConstraints):
                 )
 
 
-def plot_gw170817_constraints(ax: Axes, constraints: ObservationalConstraints):
-    if constraints.show_GW170817:
+def plot_gw170817_constraints(ax: Axes, show_observation: OBSERVATION_BOOL_MAP):
+    if show_observation["GW170817"]:
         for i, comp in enumerate(GW_COMPONENTS):
             for sigma in GW_SIGMA_LEVELS:
                 file_path = get_observation_file_path(comp, sigma)
@@ -166,8 +165,8 @@ def plot_gw170817_constraints(ax: Axes, constraints: ObservationalConstraints):
 
 def get_constraint_results_from_mr_curve(
     mr_curve_points: list[tuple[float, float]],
-) -> ConstraintResults:
-    results = ConstraintResults()
+) -> OBSERVATION_BOOL_MAP:
+    results: OBSERVATION_BOOL_MAP = new_observation_bool_map()
     contours_dict: dict[OBSERVATION_LABEL, Polygon] = {}
     observation_paths = get_all_observation_file_paths()
     for path in observation_paths:
@@ -176,15 +175,8 @@ def get_constraint_results_from_mr_curve(
         contour = Polygon(zip(df["R_km"], df["M_solar"]))
         contours_dict[label] = contour
     mr_curve = LineString(mr_curve_points)
-    # TODO: Refactor into dictionary
-    if mr_curve.intersects(contours_dict["J0740_latest"]):
-        results.is_consistent_with_J0740 = True
-    if mr_curve.intersects(contours_dict["J0030"]):
-        results.is_consistent_with_J0030 = True
-    if mr_curve.intersects(contours_dict["J0437"]):
-        results.is_consistent_with_J0437 = True
-    if mr_curve.intersects(contours_dict["J0614"]):
-        results.is_consistent_with_J0614 = True
-    if mr_curve.intersects(contours_dict["GW170817"]):
-        results.is_consistent_with_GW170817 = True
+    all_observations = get_all_observation_labels()
+    for observation in all_observations:
+        if mr_curve.intersects(contours_dict[observation]):
+            results[observation] = True
     return results

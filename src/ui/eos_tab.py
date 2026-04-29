@@ -2,7 +2,6 @@
 All user interface code.
 """
 
-from dataclasses import dataclass
 import typing
 
 from matplotlib import pyplot as plt
@@ -11,7 +10,8 @@ import streamlit as st
 
 from app_constants import DebugConstants, StreamlitKeys, UiConstants
 from constraints import (
-    ObservationalConstraints,
+    OBSERVATION_BOOL_MAP,
+    get_all_observation_labels,
     get_constraint_results_from_mr_curve,
     plot_gw170817_constraints,
     plot_nicer_constraints,
@@ -241,37 +241,7 @@ def draw_constraint_checkboxes():
     )
 
 
-def draw_constraint_results(radii: list[float], masses: list[float]):
-    mr_points = list(zip(radii, masses))
-    results = get_constraint_results_from_mr_curve(mr_points)
-    # GW170817
-    if results.is_consistent_with_GW170817:
-        st.markdown(":green[GW170817]")
-    else:
-        st.markdown(":red[GW170817]")
-    # J0740
-    if results.is_consistent_with_J0740:
-        st.markdown(":green[J0740]")
-    else:
-        st.markdown(":red[J0740]")
-    # J0030
-    if results.is_consistent_with_J0030:
-        st.markdown(":green[J0030]")
-    else:
-        st.markdown(":red[J0030]")
-    # J0437
-    if results.is_consistent_with_J0437:
-        st.markdown(":green[J0437]")
-    else:
-        st.markdown(":red[J0437]")
-    # J0614
-    if results.is_consistent_with_J0614:
-        st.markdown(":green[J0614]")
-    else:
-        st.markdown(":red[J0614]")
-
-
-def get_constraints_from_ui() -> ObservationalConstraints:
+def get_constraints_from_ui() -> OBSERVATION_BOOL_MAP:
     # If any of the checkboxes are uninitialzed, fall back to
     # `UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT`.
     show_J0740 = st.session_state.get(
@@ -289,9 +259,27 @@ def get_constraints_from_ui() -> ObservationalConstraints:
     show_GW170817 = st.session_state.get(
         StreamlitKeys.GW170817_CHECKBOX, UiConstants.SHOW_CONSTRAINTS_BY_DEFAULT
     )
-    return ObservationalConstraints(
-        show_J0740, show_J0030, show_J0437, show_J0614, show_GW170817
-    )
+    return {
+        "J0740": show_J0740,
+        "J0030": show_J0030,
+        "J0437": show_J0437,
+        "J0614": show_J0614,
+        "GW170817": show_GW170817,
+    }
+
+
+def draw_constraint_results(radii: list[float], masses: list[float]):
+    st.markdown("### Results")
+    mr_points = list(zip(radii, masses))
+    show_constraint_map = get_constraints_from_ui()
+    is_consistent_map = get_constraint_results_from_mr_curve(mr_points)
+    observations = get_all_observation_labels()
+    for label in observations:
+        if show_constraint_map[label]:
+            if is_consistent_map[label]:
+                st.markdown(f":green[{label}]")
+            else:
+                st.markdown(f":red[{label}]")
 
 
 def draw_mass_radius_curve_and_constraints(

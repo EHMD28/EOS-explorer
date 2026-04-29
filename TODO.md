@@ -3,7 +3,7 @@
 - [x] Add TOV solver code
 - [x] Verify that solver works
 - [x] Compare EoS to tabulated EoS from CompOse
-- [ ] Find and apply constraints
+- [x] Find and apply constraints
 
 # User Interface
 
@@ -22,6 +22,7 @@
         - [x] Plot pressure and mass of star vs radius.
 - [ ] Add a radius slider
 - [ ] Allow user to download computed MR and EoS data
+- [ ] Allow user to upload multiple MR curves
 
 # Math
 
@@ -29,8 +30,3 @@
 - [x] Add dimensionless TOV equation
 - [ ] Add polytropic EoS
 - [ ] Update all PDFs
-
-# Research Paper
-
-- [ ] Remove identifying information
-- [ ] Upload to repo
