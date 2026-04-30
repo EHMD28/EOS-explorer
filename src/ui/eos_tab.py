@@ -416,7 +416,6 @@ def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = 
 def draw_mr_curve_for_tabulated_eos():
     eos_file = st.session_state[StreamlitKeys.EOS_FILE_UPLOAD_WIDGET]
     if eos_file is not None:
-        eos_file.seek(0)
         ext = eos_file.name.split(".")[-1]
         eos_data = load_eos_from_file(eos_file, extension=ext)
         if eos_data is not None:
@@ -472,7 +471,6 @@ def draw_ui_for_tabulated_eos():
     draw_eos_file_upload_widget()
     draw_tabulated_eos_plot()
     draw_mr_curve_for_tabulated_eos()
-    st.write(st.session_state)
 
 
 def draw_ui_for_soc_eos():

@@ -6,6 +6,7 @@ suffixed with `_p` (meaning prime), that means that quantity is dimensionless.
 from typing import Callable, TypedDict
 
 import numpy as np
+import pandas as pd
 from scipy.integrate import solve_ivp
 from scipy.constants import G, c, pi
 
@@ -145,4 +146,10 @@ def generate_mass_radius_curve(
         radius_km, mass_sol = solve_dimensionless_tov(p_c, eos_eps_fn)
         radii.append(radius_km)
         masses.append(mass_sol)
+    # Only include values for which mass increases with respect to the radius.
+    df = pd.DataFrame({"p_c": p_c_values, "r": radii, "m": masses})
+    max_mass_idx = df["m"].idxmax()
+    df = df[:max_mass_idx]
+    radii = df["r"].tolist()
+    masses = df["m"].tolist()
     return (radii, masses)
