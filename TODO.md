@@ -21,12 +21,12 @@
     - [x] Run TOV for specific central pressure
         - [x] Plot pressure and mass of star vs radius.
 - [ ] Add a radius slider
-- [ ] Allow user to download computed MR and EoS data
-- [ ] Allow user to upload multiple MR curves
+- [x] Allow user to download computed MR and EoS data
+- [x] Allow user to upload multiple MR curves
 
 # Math
 
 - [x] Add TOV equation
 - [x] Add dimensionless TOV equation
-- [ ] Add polytropic EoS
+- [x] Add polytropic EoS
 - [ ] Update all PDFs

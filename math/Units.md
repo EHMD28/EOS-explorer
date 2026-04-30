@@ -15,11 +15,6 @@ $$ c = L \cdot T^{-1} $$
 $$ 1 = L \cdot T^{-1} $$
 $$ T = L $$
 
-where $L$ is a unit of length and $T$ is a unit of time. To convert an meters-kilograms-seconds (MKS) value to relativistic units, simply use the following.
-
-$$ c = 1 = 2.99792458 \times 10^8 \space m \cdot s^{-1} $$
-$$ 1 \space s = 2.99792458 \times 10^8 \space m $$
-
 ## Radius Scaling
 
 The relativistic, dimensionless scaling for radius is ([see TOV.md](TOV.md#dimensionless-tov-equation))
@@ -49,7 +44,7 @@ For $a$ to represent a physical quantity, it must be multiplied by a quantity wi
 $$ r_{rel} = a_{rel} \cdot r'$$
 $$ r_{phys} = r_{rel} \cdot c^2$$
 
-As long as $G$ and $\varepsilon_0$ are using the same system of units, $r_phys$ will be in the base unit of length. For the sake of simplicity, the project just uses SI units. Therefore, $r_phys$ is in units of meters. To conver to kilometers, simply divide by 1000: $r_{km} = r_{phys} \div 1000$.
+As long as $G$ and $\varepsilon_0$ are using the same system of units, $r_{phys}$ will be in the base unit of length. For the sake of simplicity, the project just uses SI units. Therefore, $r_{phys}$ is in units of meters. To conver to kilometers, simply divide by 1000: $r_{km} = r_{phys} \div 1000$.
 
 ## Mass Rescaling
 
@@ -74,5 +69,4 @@ $b$ should have a dimension of mass, so it must be multiplied by $c^4$.
 $$ m_{rel} = b \cdot m_r' $$
 $$ m_{phys} = m_{rel} \cdot c^4 $$
 
-As long as $G$ and $\varepsilon_0$ are using the same system of units, $m_phys$ will be in the base unit of mass. For the sake of simplicity, the project just uses SI units. Therefore, $m_phys$ is in units of meters. To conver to solar masses, simply divide by by the [mass of the sun](https://en.wikipedia.org/wiki/Solar_mass). $m_{M \odot} = m_{kg} \div (1.988416 \times 10^{30})$.
-
+As long as $G$ and $\varepsilon_0$ are using the same system of units, $m_{phys}$ will be in the base unit of mass. For the sake of simplicity, the project just uses SI units. Therefore, $m_{phys}$ is in units of meters. To conver to solar masses, simply divide by by the [mass of the sun](https://en.wikipedia.org/wiki/Solar_mass). $m_{M \odot} = m_{kg} \div (1.988416 \times 10^{30})$.

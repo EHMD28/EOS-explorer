@@ -385,6 +385,22 @@ def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = 
         )
 
 
+def draw_mr_curve_for_tabulated_eos():
+    eos_file = st.session_state[StreamlitKeys.EOS_FILE_UPLOAD_WIDGET]
+    if eos_file is not None:
+        eos_file.seek(0)
+        ext = eos_file.name.split(".")[-1]
+        eos_data = load_eos_from_file(eos_file, extension=ext)
+        if eos_data is not None:
+            densities, pressure = eos_data
+            log_interpolator = LogarithmicInterpolator(
+                x_values=pressure, y_values=densities
+            )
+            draw_ui_for_mass_radius_curve(lambda p: log_interpolator.get_y(p))
+    else:
+        draw_ui_for_mass_radius_curve(lambda _: 0.0, is_blank=True)
+
+
 # -------------------- General UI --------------------
 
 
@@ -421,22 +437,6 @@ def draw_ui_for_polytropic_eos():
     draw_ui_for_mass_radius_curve(
         eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
     )
-
-
-def draw_mr_curve_for_tabulated_eos():
-    eos_file = st.session_state[StreamlitKeys.EOS_FILE_UPLOAD_WIDGET]
-    if eos_file is not None:
-        eos_file.seek(0)
-        ext = eos_file.name.split(".")[-1]
-        eos_data = load_eos_from_file(eos_file, extension=ext)
-        if eos_data is not None:
-            densities, pressure = eos_data
-            log_interpolator = LogarithmicInterpolator(
-                x_values=pressure, y_values=densities
-            )
-            draw_ui_for_mass_radius_curve(lambda p: log_interpolator.get_y(p))
-    else:
-        draw_ui_for_mass_radius_curve(lambda _: 0.0, is_blank=True)
 
 
 def draw_ui_for_tabulated_eos():
