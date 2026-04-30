@@ -6,6 +6,8 @@ from ui.eos_tab import (
 
 import streamlit as st
 
+from ui.info_tab import draw_ui_for_info_tab
+
 
 def draw_ui():
     """
@@ -21,4 +23,4 @@ def draw_ui():
             case "Tabulated":
                 draw_ui_for_tabulated_eos()
     with info_tab:
-        ...
+        draw_ui_for_info_tab()

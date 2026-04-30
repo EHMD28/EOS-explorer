@@ -20,7 +20,7 @@
     - [x] Convert betewen dimensionless and dimensional values
     - [x] Run TOV for specific central pressure
         - [x] Plot pressure and mass of star vs radius.
-- [ ] Add a radius slider
+- [x] Add a radius slider
 - [x] Allow user to download computed MR and EoS data
 - [x] Allow user to upload multiple MR curves
 
