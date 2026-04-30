@@ -32,12 +32,16 @@ class StreamlitKeys:
     """
 
     # ----- EoS Tab -----
+
+    ## ----- Polytropic EoS -----
     ENERGY_DENSITY_SLIDER = "energy-density-slider"
-    PRESSURE_SLIDER = "pressure-slider"
     EOS_FILE_UPLOAD_WIDGET = "eos-file-upload-widget"
-    MR_FILE_UPLOAD_WIDGET = "mass-radius-file-upload-widget"
     POLYTROPIC_EOS_KAPPA_INPUT = "polytropic-eos-kappa-input"
     POLYTROPIC_EOS_GAMMA_INPUT = "polytropic-eos-gamma-input"
+
+    ## ----- Mass-Radius Curve -----
+    PRESSURE_SLIDER = "pressure-slider"
+    MR_FILE_UPLOAD_WIDGET = "mass-radius-file-upload-widget"
 
     ## ----- Observational Constraints -----
     J0740_CHECKBOX = "J0740-checkbox"

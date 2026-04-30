@@ -2,8 +2,8 @@
 Tabulated EoS handling.
 """
 
-import csv
-from typing import TextIO
+from typing import Literal, TextIO
+import typing
 
 import numpy as np
 import pandas as pd
@@ -28,7 +28,23 @@ class LogarithmicInterpolator:
         return 10**log_y_out
 
 
-def load_eos_from_file(data_file: TextIO) -> tuple[list[float], list[float]] | None:
+ALLOWED_FILE_EXTENSIONS = Literal["txt", "csv", "tsv"]
+
+
+def get_allowed_file_extensions():
+    return typing.get_args(ALLOWED_FILE_EXTENSIONS)
+
+
+EXTENSION_TO_DELIMETER_MAP: dict[ALLOWED_FILE_EXTENSIONS, str] = {
+    "txt": " ",
+    "csv": ",",
+    "tsv": "\t",
+}
+
+
+def load_eos_from_file(
+    data_file: TextIO, extension: ALLOWED_FILE_EXTENSIONS
+) -> tuple[list[float], list[float]] | None:
     """
     Extracts the pressures and energy densities from `data_file`. This function
     assumes that `data_file` has a header row with columns p (pressure [MeV/fm^3])
@@ -38,7 +54,9 @@ def load_eos_from_file(data_file: TextIO) -> tuple[list[float], list[float]] | N
     This function should be able to handle any delimeter, but commas or tabs are
     preferred.
     """
-    df = pd.read_csv(data_file, sep=None, header="infer", comment="#", engine="python")
+    data_file.seek(0)
+    sep = EXTENSION_TO_DELIMETER_MAP[extension]
+    df = pd.read_csv(data_file, sep=sep, header="infer", comment="#")
     header = df.columns.values
     if "p" in header and "e" in header:
         pressures: pd.Series[float] = df["p"]
@@ -49,7 +67,7 @@ def load_eos_from_file(data_file: TextIO) -> tuple[list[float], list[float]] | N
 
 
 def load_mr_curve_from_file(
-    data_file: TextIO,
+    data_file: TextIO, extension: ALLOWED_FILE_EXTENSIONS
 ) -> tuple[list[float], list[float]] | None:
     """
     Extracts the masses and radii from `data_file`. This function
@@ -60,7 +78,9 @@ def load_mr_curve_from_file(
     This function should be able to handle any delimeter, but commas or tabs are
     preferred.
     """
-    df = pd.read_csv(data_file, sep=None, header="infer", comment="#", engine="python")
+    data_file.seek(0)
+    sep = EXTENSION_TO_DELIMETER_MAP[extension]
+    df = pd.read_csv(data_file, sep=sep, header="infer", comment="#")
     header = df.columns.values
     if "m" in header and "r" in header:
         masses: pd.Series[float] = df["m"]
