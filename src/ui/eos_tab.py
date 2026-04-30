@@ -2,10 +2,13 @@
 All user interface code.
 """
 
+from io import StringIO
+import textwrap
 import typing
 
 from matplotlib import pyplot as plt
 import numpy as np
+import pandas as pd
 import streamlit as st
 
 from app_constants import DebugConstants, StreamlitKeys, UiConstants
@@ -282,6 +285,25 @@ def draw_constraint_results(radii: list[float], masses: list[float]):
                 st.markdown(f":red[{label}]")
 
 
+@st.cache_data
+def generate_mr_curve_file(radii: list[float], masses: list[float]) -> bytes:
+    df = pd.DataFrame(
+        {
+            # Kilometers
+            "r": radii,
+            # Solar Masses
+            "m": masses,
+        }
+    )
+    file_header = textwrap.dedent("""\
+    # This file was generated with EoS Explorer
+    # Radius [km]\tMass [M_solar]
+    """)
+    file = StringIO(file_header)
+    df.to_csv(file, mode="a", sep="\t", header=True, index=False)
+    return file.getvalue().encode("utf-8")
+
+
 def draw_mass_radius_curve_and_constraints(
     radii: list[float],
     masses: list[float],
@@ -308,13 +330,22 @@ def draw_mass_radius_curve_and_constraints(
     # TODO: Add radius-limiting slider.
     ax.set_xlim(8, 16)
     ax.legend(loc="upper left", fontsize=8)
-    constraints_col, plot_col, _ = st.columns(UiConstants.CENTERED_WITH_MARGINS_SPEC)
+    constraints_col, plot_col, info_and_download_col = st.columns(
+        UiConstants.CENTERED_WITH_MARGINS_SPEC
+    )
     with constraints_col:
         draw_constraint_checkboxes()
         st.divider()
         draw_constraint_results(radii, masses)
     with plot_col:
         st.pyplot(fig)
+    with info_and_download_col:
+        mr_file = generate_mr_curve_file(radii, masses)
+        st.download_button(
+            "Download Mass-Radius Curve",
+            data=mr_file,
+            file_name="eos-explorer-mr-curve.tsv",
+        )
 
 
 def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = False):
