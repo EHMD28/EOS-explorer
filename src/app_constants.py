@@ -41,6 +41,8 @@ class StreamlitKeys:
 
     ## ----- Mass-Radius Curve -----
     PRESSURE_SLIDER = "pressure-slider"
+    LIMIT_RADIUS_CHECKBOX = "limit-radius-checkbox"
+    RADIUS_RANGE_SLIDER = "radius-range-slider"
     MR_FILE_UPLOAD_WIDGET = "mass-radius-file-upload-widget"
 
     ## ----- Observational Constraints -----
@@ -61,3 +63,4 @@ class UiConstants:
     # The middle column is three times the width of the margin columns.
     CENTERED_WITH_MARGINS_SPEC = [1, 3, 1]
     SHOW_CONSTRAINTS_BY_DEFAULT = True
+    DEFAULT_RADIUS_RANGE = (8, 16)

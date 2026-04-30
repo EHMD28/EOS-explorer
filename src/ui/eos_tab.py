@@ -169,12 +169,6 @@ def draw_tabulated_eos_plot():
     eos_data = plot_tabulated_eos(ax)
     if eos_data is not None:
         tabulated_densities, tabulated_pressures = eos_data
-        ax.scatter(
-            tabulated_densities,
-            tabulated_pressures,
-            color="orange",
-            label="Tabulated EoS",
-        )
         log_interpolator = LogarithmicInterpolator(
             x_values=tabulated_densities, y_values=tabulated_pressures
         )
@@ -297,6 +291,23 @@ def draw_constraint_results(radii: list[float], masses: list[float]):
                 st.markdown(f":red[{label}]")
 
 
+def draw_max_mass():
+    st.markdown("Max Mass: {TODO} $M_\\odot$")
+
+
+def draw_mr_curve_display_options():
+    limit_radii = st.checkbox(
+        "Limit Radii", value=True, key=StreamlitKeys.LIMIT_RADIUS_CHECKBOX
+    )
+    if limit_radii:
+        st.slider(
+            "Radius Range",
+            value=UiConstants.DEFAULT_RADIUS_RANGE,
+            step=1,
+            key=StreamlitKeys.RADIUS_RANGE_SLIDER,
+        )
+
+
 @st.cache_data
 def generate_mr_curve_file(radii: list[float], masses: list[float]) -> bytes:
     df = pd.DataFrame(
@@ -317,6 +328,15 @@ def generate_mr_curve_file(radii: list[float], masses: list[float]) -> bytes:
     return file.getvalue().encode("utf-8")
 
 
+def draw_mr_download_button(radii: list[float], masses: list[float]):
+    mr_file = generate_mr_curve_file(radii, masses)
+    st.download_button(
+        "Download Mass-Radius Curve",
+        data=mr_file,
+        file_name="eos-explorer-mr-curve.tsv",
+    )
+
+
 def plot_uploaded_mr_curves(ax: Axes):
     mr_files = st.session_state.get(StreamlitKeys.MR_FILE_UPLOAD_WIDGET, [])
     for file in mr_files:
@@ -325,6 +345,29 @@ def plot_uploaded_mr_curves(ax: Axes):
         if data is not None:
             radii, masses = data
             ax.scatter(radii, masses, label=name)
+
+
+def plot_mr_curves(ax: Axes, radii: list[float], masses: list[float]):
+    ax.set_title("Mass-Radius Curve")
+    ax.set_xlabel("Radius [km]")
+    ax.set_ylabel(r"Mass [M$_\odot$]")
+    ax.grid(alpha=0.3)
+    plot_uploaded_mr_curves(ax)
+    ax.plot(radii, masses, color="blue", label="TOV Solver")
+    constraints = get_constraints_from_ui()
+    plot_nicer_constraints(ax, constraints)
+    plot_gw170817_constraints(ax, constraints)
+    ax.set_ylim(0, 3.5)
+    limit_radius = st.session_state.get(StreamlitKeys.RADIUS_RANGE_SLIDER, True)
+    if limit_radius:
+        radius_range = st.session_state.get(
+            StreamlitKeys.RADIUS_RANGE_SLIDER, UiConstants.DEFAULT_RADIUS_RANGE
+        )
+        r_min, r_max = radius_range
+        ax.set_xlim(r_min, r_max)
+    else:
+        ax.set_xlim(None, None)
+    ax.legend(loc="upper left", fontsize=8)
 
 
 def draw_mr_curve_and_constraints(
@@ -337,19 +380,7 @@ def draw_mr_curve_and_constraints(
     those as points.
     """
     fig, ax = plt.subplots()
-    ax.set_title("Mass-Radius Curve")
-    ax.set_xlabel("Radius [km]")
-    ax.set_ylabel(r"Mass [M$_\odot$]")
-    ax.grid(alpha=0.3)
-    plot_uploaded_mr_curves(ax)
-    ax.plot(radii, masses, color="blue", label="TOV Solver")
-    constraints = get_constraints_from_ui()
-    plot_nicer_constraints(ax, constraints)
-    plot_gw170817_constraints(ax, constraints)
-    ax.set_ylim(0, 3.5)
-    # TODO: Add radius-limiting slider.
-    ax.set_xlim(8, 16)
-    ax.legend(loc="upper left", fontsize=8)
+    plot_mr_curves(ax, radii, masses)
     constraints_col, plot_col, info_and_download_col = st.columns(
         UiConstants.CENTERED_WITH_MARGINS_SPEC
     )
@@ -360,12 +391,9 @@ def draw_mr_curve_and_constraints(
     with plot_col:
         st.pyplot(fig)
     with info_and_download_col:
-        mr_file = generate_mr_curve_file(radii, masses)
-        st.download_button(
-            "Download Mass-Radius Curve",
-            data=mr_file,
-            file_name="eos-explorer-mr-curve.tsv",
-        )
+        draw_max_mass()
+        draw_mr_curve_display_options()
+        draw_mr_download_button(radii, masses)
 
 
 def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = False):
@@ -444,6 +472,7 @@ def draw_ui_for_tabulated_eos():
     draw_eos_file_upload_widget()
     draw_tabulated_eos_plot()
     draw_mr_curve_for_tabulated_eos()
+    st.write(st.session_state)
 
 
 def draw_ui_for_soc_eos():
