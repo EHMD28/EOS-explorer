@@ -296,8 +296,8 @@ def draw_constraint_results(radii: list[float], masses: list[float]):
                 st.markdown(f":red[{label}]")
 
 
-def draw_max_mass():
-    st.markdown("Max Mass: {TODO} $M_\\odot$")
+def draw_max_mass(m_mass: float):
+    st.markdown(f"Max Mass: {m_mass:.2f} M$_\\odot$")
 
 
 def draw_mr_curve_display_options():
@@ -363,7 +363,7 @@ def plot_mr_curves(ax: Axes, radii: list[float], masses: list[float]):
     plot_nicer_constraints(ax, constraints)
     plot_gw170817_constraints(ax, constraints)
     ax.set_ylim(0, 3.5)
-    limit_radius = st.session_state.get(StreamlitKeys.RADIUS_RANGE_SLIDER, True)
+    limit_radius = st.session_state.get(StreamlitKeys.LIMIT_RADIUS_CHECKBOX, True)
     if limit_radius:
         radius_range = st.session_state.get(
             StreamlitKeys.RADIUS_RANGE_SLIDER, UiConstants.DEFAULT_RADIUS_RANGE
@@ -396,7 +396,8 @@ def draw_mr_curve_and_constraints(
     with plot_col:
         st.pyplot(fig)
     with info_and_download_col:
-        draw_max_mass()
+        max_mass = max(masses) if masses else 0
+        draw_max_mass(max_mass)
         draw_mr_curve_display_options()
         draw_mr_download_button(radii, masses)
 
