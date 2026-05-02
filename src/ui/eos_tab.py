@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from app_constants import DebugConstants, StreamlitKeys, UiConstants
+from app_constants import EosConstants, StreamlitKeys, UiConstants
 from constraints import (
     OBSERVATION_BOOL_MAP,
     get_all_observation_labels,
@@ -70,16 +70,16 @@ def draw_polytropic_parameters_inputs():
         # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
-        value=DebugConstants.MID_DENSITY_KAPPA,  # TODO: Change to a reasonable default
+        value=EosConstants.DEFAULT_KAPPA,
         format="%e",
         key=StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT,
     )
     st.number_input(
-        label="𝛾 - Stiffness Value",
+        label="𝛾 - Stiffness Constant",
         # Min and max value are arbitary. Might change/remove them later.
         min_value=-1.0,
         max_value=10.0,
-        value=DebugConstants.MID_DENSITY_GAMMA,  # TODO: Change to a reasonable default
+        value=EosConstants.DEFAULT_GAMMA,
         format="%.10f",
         key=StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT,
     )
