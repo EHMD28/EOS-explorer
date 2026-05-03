@@ -1,6 +1,7 @@
 # Equation of State Data
 
 `gev/` - Contains tabulated EoSs with the energy in GeV/fm^3
+
 `mev/` - Contains tabulated EoSs with the energy in MeV/fm^3. See below for mapping from EoS number to EoS name.
 
 ```
