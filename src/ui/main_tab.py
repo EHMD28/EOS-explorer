@@ -1,7 +1,3 @@
-"""
-All user interface code.
-"""
-
 from io import StringIO
 import textwrap
 import typing
@@ -27,7 +23,7 @@ from eos.tabulated import (
     load_eos_from_file,
     load_mr_curve_from_file,
 )
-from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
+from solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
 # -------------------- Types --------------------
 
@@ -37,9 +33,6 @@ EOS_OPTIONS_TYPE = typing.Literal["Polytropic", "Tabulated"]
 
 
 def draw_info_for_polytropic_eos():
-    """
-    Write relevant information for the polytropic EoS to the UI.
-    """
     st.markdown("# Polytropic Equation of State")
     st.latex(r"P(\varepsilon) = K\varepsilon^\gamma.")
     st.markdown(r"$P(\varepsilon)$ = Pressure in _MeV/fm^3_.")
@@ -58,14 +51,9 @@ def draw_info_for_polytropic_eos():
 
 
 def draw_polytropic_parameters_inputs():
-    """
-    Write the parameter sliders to the UI. Returns a tuple containing the chosen
-    values of the parameters in the form (kappa, gamma).
-    """
     st.markdown("## Parameters ")
     st.number_input(
         label="K - Proportionality Constant",
-        # Min and max value are arbitary. Might change/remove them later.
         min_value=1e-10,
         max_value=5.0,
         value=EosConstants.DEFAULT_KAPPA,
@@ -74,7 +62,6 @@ def draw_polytropic_parameters_inputs():
     )
     st.number_input(
         label="𝛾 - Stiffness Constant",
-        # Min and max value are arbitary. Might change/remove them later.
         min_value=-1.0,
         max_value=10.0,
         value=EosConstants.DEFAULT_GAMMA,
@@ -84,13 +71,8 @@ def draw_polytropic_parameters_inputs():
 
 
 def draw_density_range_slider():
-    """
-    Write the energy density range slider to the UI. Returns a tuple containing
-    the chosen range of energy density order of magnitude values.
-    """
     st.slider(
         label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
-        # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=10,
         value=(-5, 5),
@@ -99,11 +81,6 @@ def draw_density_range_slider():
 
 
 def draw_eos_file_upload_widget() -> tuple[list[float], list[float]] | None:
-    """
-    Write the EoS file upload option to the UI. Returns a tuple of the form
-    (densities, pressure) if a file of the correct format was uploaded, otherwise
-    None.
-    """
     st.file_uploader(
         label="Choose an EoS data file",
         type=["txt", "csv", "tsv"],
@@ -188,14 +165,8 @@ def draw_tabulated_eos_plot():
 
 
 def draw_central_pressure_slider():
-    """
-    Write the pressure range slider to the UI. Returns a tuple containing
-    the chosen orders of magnitude for pressure [MeV/fm^3] in the form
-    (start, end).
-    """
     st.slider(
         label=r"$P$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
-        # Min and max value are arbitary. Might change/remove them later.
         min_value=-20,
         max_value=20,
         value=(0, 4),
@@ -204,11 +175,6 @@ def draw_central_pressure_slider():
 
 
 def draw_mr_file_upload_widget():
-    """
-    Write the mass-radius curve file upload option to the UI. Returns a tuple of
-    the form (radii, masses) if a file of the correct format was uploaded, otherwise
-    None.
-    """
     st.markdown(
         "See [here](https://github.com/EHMD28/EOS-explorer/tree/main/data/mr)"
         " for an example of the expected format (note that the `l` column is"
@@ -377,11 +343,6 @@ def draw_mr_curve_and_constraints(
     radii: list[float],
     masses: list[float],
 ):
-    """
-    Write the mass-radius curve plot to the UI using the chosen parameters. If
-    `tabulated_radii` and `tabulated_masses` are included, then it will plot
-    those as points.
-    """
     fig, ax = plt.subplots()
     plot_mr_curves(ax, radii, masses)
     constraints_col, plot_col, info_and_download_col = st.columns(

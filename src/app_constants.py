@@ -17,15 +17,6 @@ class ScalingConstants:
     M_SUN_IN_KG = 1.988416e30
 
 
-# class DebugConstants:
-#     # Polytrope fitted to lower densities
-#     LOW_DENSITY_KAPPA = 1e-2
-#     LOW_DENSITY_GAMMA = 1.4952530968
-#     # Polytrope fitted around 10 MeV/fm3
-#     MID_DENSITY_KAPPA = 1.2e-3
-#     MID_DENSITY_GAMMA = 1.75
-
-
 class EosConstants:
     DEFAULT_KAPPA = 7.658467851116847e-05
     DEFAULT_GAMMA = 2.1675764038620957

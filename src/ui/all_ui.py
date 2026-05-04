@@ -1,4 +1,4 @@
-from ui.eos_tab import (
+from ui.main_tab import (
     draw_and_get_eos_dropdown,
     draw_ui_for_polytropic_eos,
     draw_ui_for_tabulated_eos,

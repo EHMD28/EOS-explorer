@@ -46,13 +46,9 @@ def load_eos_from_file(
     data_file: TextIO, extension: ALLOWED_FILE_EXTENSIONS
 ) -> tuple[list[float], list[float]] | None:
     """
-    Extracts the pressures and energy densities from `data_file`. This function
-    assumes that `data_file` has a header row with columns p (pressure [MeV/fm^3])
-    and e (energy density [MeV/fm^3]). Also, any non-data rows must be prefixed
-    with '#'. If there are any issues, this function will return `None`.
-
-    This function should be able to handle any delimeter, but commas or tabs are
-    preferred.
+    Extracts EoS data from a file-like object. Assumes file has the columns 'p'
+    for pressure in MeV/fm^3 and 'e' for energy density in MeV/fm^3. The
+    delimeter is inferred from the file extension.
     """
     data_file.seek(0)
     sep = EXTENSION_TO_DELIMETER_MAP[extension]
@@ -70,13 +66,9 @@ def load_mr_curve_from_file(
     data_file: TextIO, extension: ALLOWED_FILE_EXTENSIONS
 ) -> tuple[list[float], list[float]] | None:
     """
-    Extracts the masses and radii from `data_file`. This function
-    assumes that `data_file` has a header row with columns m (mass [solar masses])
-    and r (radius [km]). Also, any non-data rows must be prefixed
-    with '#'. If there are any issues, this function will return `None`.
-
-    This function should be able to handle any delimeter, but commas or tabs are
-    preferred.
+    Extracts mass-radius curve data from a file-like object. Assumes file has
+    the columns 'r' for radius in km and 'm' for mass in solar masses. The
+    delimeter is inferred from the file extension.
     """
     data_file.seek(0)
     sep = EXTENSION_TO_DELIMETER_MAP[extension]
@@ -88,15 +80,3 @@ def load_mr_curve_from_file(
         return (radii.tolist(), masses.tolist())
     else:
         return None
-
-
-def interpolate_eps(p: float, densities: list[float], pressures: list[float]) -> float:
-    """
-    Interpolate EoS using `densities` and `pressures`. All quantities should have
-    a unit of MeV/fm^3 using NumPy's interpolation method.
-    """
-    log_p = np.log10(pressures)
-    log_eps = np.log10(densities)
-    p_in = np.log10(p)
-    log_eps_out = np.interp(p_in, log_p, log_eps)
-    return 10**log_eps_out

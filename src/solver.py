@@ -3,7 +3,7 @@ Tolman-Oppenheimer-Volkoff equation solver. Note that any time a variable is
 suffixed with `_p` (meaning prime), that means that quantity is dimensionless.
 """
 
-from typing import Callable, TypedDict
+from typing import Callable
 
 import numpy as np
 import pandas as pd
