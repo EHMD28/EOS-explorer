@@ -31,9 +31,7 @@ from tov.solver import EOS_EPS_FN_TYPE, generate_mass_radius_curve
 
 # -------------------- Types --------------------
 
-EOS_OPTIONS_TYPE = typing.Literal[
-    "Polytropic", "Tabulated", "Speed-of-Sound Interpolation"
-]
+EOS_OPTIONS_TYPE = typing.Literal["Polytropic", "Tabulated"]
 
 # -------------------- Polytropic Equation of State --------------------
 
