@@ -34,12 +34,14 @@ class StreamlitKeys:
     EOS_FILE_UPLOAD_WIDGET = "eos-file-upload-widget"
     POLYTROPIC_EOS_KAPPA_INPUT = "polytropic-eos-kappa-input"
     POLYTROPIC_EOS_GAMMA_INPUT = "polytropic-eos-gamma-input"
+    EOS_DATAFRAME = "equation-of-state-df"
 
     ## ----- Mass-Radius Curve -----
     PRESSURE_SLIDER = "pressure-slider"
     LIMIT_RADIUS_CHECKBOX = "limit-radius-checkbox"
     RADIUS_RANGE_SLIDER = "radius-range-slider"
     MR_FILE_UPLOAD_WIDGET = "mass-radius-file-upload-widget"
+    MR_DATAFRAME = "mass-radius-df"
 
     ## ----- Observational Constraints -----
     J0740_CHECKBOX = "J0740-checkbox"

@@ -80,7 +80,7 @@ def draw_density_range_slider():
     )
 
 
-def draw_eos_file_upload_widget() -> tuple[list[float], list[float]] | None:
+def draw_eos_file_upload_widget():
     st.file_uploader(
         label="Choose an EoS data file",
         type=["txt", "csv", "tsv"],
@@ -88,18 +88,50 @@ def draw_eos_file_upload_widget() -> tuple[list[float], list[float]] | None:
     )
 
 
-def draw_polytropic_eos_plot(
-    kappa: float,
-    gamma: float,
-    eps_magnitudes: tuple[float, float],
+@st.cache_data
+def generate_polytropic_eos_file(
+    eps: list[float], p: list[float], kappa: float, gamma: float
 ):
+    df = pd.DataFrame(
+        {
+            # MeV/fm^3
+            "e": eps,
+            # MeV/fm^3
+            "p": p,
+        }
+    )
+    file_header = textwrap.dedent(f"""\
+    # This file was generated with EoS Explorer using parameters K = {kappa} and gamma = {gamma}.
+    # Energy Density [MeV/fm^3]	Pressure [MeV/fm^3]
+              
+    """)
+    file = StringIO()
+    file.write(file_header)
+    df.to_csv(file, mode="a", sep="\t", header=True, index=False)
+    return file.getvalue().encode("utf-8")
+
+
+def draw_polytropic_eos_download_button():
+    kappa = st.session_state[StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT]
+    gamma = st.session_state[StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT]
+    eps_start_exp, eps_end_exp = st.session_state[StreamlitKeys.ENERGY_DENSITY_SLIDER]
+    eps_values = np.logspace(eps_start_exp, eps_end_exp, num=200)
+    p_values = polytropic_eos_p(eps_values.tolist(), kappa, gamma)
+    eos_file = generate_polytropic_eos_file(eps_values, p_values, kappa, gamma)
+    st.download_button("Download EoS Data", eos_file, file_name="polytropic-eos.tsv")
+
+
+def draw_polytropic_eos_plot():
     """
     Write the EoS plot to the UI using the chosen parameters. If `densities` and
     `pressures` (from a tabulated EoS) are included, then it will plot those as
     points.
     """
-    eps_start, eps_end = eps_magnitudes
-    eps_values = np.logspace(eps_start, eps_end, num=200)
+    kappa = st.session_state[StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT]
+    gamma = st.session_state[StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT]
+    # Exponents (10^n) for energy density range.
+    eps_start_exp, eps_end_exp = st.session_state[StreamlitKeys.ENERGY_DENSITY_SLIDER]
+    eps_values = np.logspace(eps_start_exp, eps_end_exp, num=200)
     p_values = polytropic_eos_p(eps_values.tolist(), kappa, gamma)
     fig, ax = plt.subplots()
     ax.set_title("Pressure vs. Energy Density")
@@ -336,7 +368,7 @@ def plot_mr_curves(ax: Axes, radii: list[float], masses: list[float]):
         ax.set_xlim(r_min, r_max)
     else:
         ax.set_xlim(None, None)
-    ax.legend(loc="upper left", fontsize=8)
+    ax.legend(loc="upper left", fontsize=8, bbox_to_anchor=(0.25, -0.15), ncol=2)
 
 
 def draw_mr_curve_and_constraints(
@@ -417,15 +449,11 @@ def draw_ui_for_polytropic_eos():
         draw_polytropic_parameters_inputs()
         draw_density_range_slider()
         draw_eos_file_upload_widget()
+        draw_polytropic_eos_download_button()
     with col_two:
-        kappa = st.session_state[StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT]
-        gamma = st.session_state[StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT]
-        eps_start, eps_end = st.session_state[StreamlitKeys.ENERGY_DENSITY_SLIDER]
-        draw_polytropic_eos_plot(
-            kappa,
-            gamma,
-            eps_magnitudes=(eps_start, eps_end),
-        )
+        draw_polytropic_eos_plot()
+    kappa = st.session_state[StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT]
+    gamma = st.session_state[StreamlitKeys.POLYTROPIC_EOS_GAMMA_INPUT]
     draw_ui_for_mass_radius_curve(
         eos_eps_fn=lambda p: polytropic_eos_eps(p, kappa, gamma)
     )
