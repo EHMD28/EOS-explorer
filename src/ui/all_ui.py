@@ -1,3 +1,4 @@
+from ui.demo_tab import draw_ui_for_demo_tab
 from ui.main_tab import (
     draw_and_get_eos_dropdown,
     draw_ui_for_polytropic_eos,
@@ -13,8 +14,8 @@ def draw_ui():
     """
     Write components to user interface.
     """
-    tab_names = ["Main", "Info"]
-    main_tab, info_tab = st.tabs(tab_names)
+    tab_names = ["Main", "Demo", "Info"]
+    main_tab, demo_tab, info_tab = st.tabs(tab_names)
     with main_tab:
         eos_dropdown = draw_and_get_eos_dropdown()
         match eos_dropdown:
@@ -22,5 +23,7 @@ def draw_ui():
                 draw_ui_for_polytropic_eos()
             case "Tabulated":
                 draw_ui_for_tabulated_eos()
+    with demo_tab:
+        draw_ui_for_demo_tab()
     with info_tab:
         draw_ui_for_info_tab()
