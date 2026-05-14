@@ -40,7 +40,7 @@ def draw_info_for_polytropic_eos():
     st.markdown(
         r"$\Kappa$ = Proportionality Constant. The dimension of $K$ cancels out the dimension of $\varepsilon^\gamma$."
     )
-    st.markdown(r"$\gamma$ = Polytropic Index (dimensionless) ")
+    st.markdown(r"$\gamma$ = Polytropic Exponent (dimensionless) ")
     st.text(
         "Note that, using the rules of logarithms, the equation can be rearranged to the following form."
     )
@@ -61,7 +61,7 @@ def draw_polytropic_parameters_inputs():
         key=StreamlitKeys.POLYTROPIC_EOS_KAPPA_INPUT,
     )
     st.number_input(
-        label="𝛾 - Stiffness Constant",
+        label=r"$\gamma$ - Polytropic Exponent",
         min_value=-1.0,
         max_value=10.0,
         value=EosConstants.DEFAULT_GAMMA,
@@ -72,7 +72,7 @@ def draw_polytropic_parameters_inputs():
 
 def draw_density_range_slider():
     st.slider(
-        label=r"$\varepsilon$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
+        label=r"$\varepsilon$ Exponent Range - Evaluation Range: $[10^{start}, 10^{end})$",
         min_value=-20,
         max_value=10,
         value=(-5, 5),
@@ -198,7 +198,7 @@ def draw_tabulated_eos_plot():
 
 def draw_central_pressure_slider():
     st.slider(
-        label=r"$P$ Magnitude Range - Evaluation Range: $[10^{start}, 10^{end})$",
+        label=r"$P$ Exponent Range - Evaluation Range: $[10^{start}, 10^{end})$",
         min_value=-20,
         max_value=20,
         value=(0, 4),
@@ -400,7 +400,7 @@ def draw_ui_for_mass_radius_curve(eos_eps_fn: EOS_EPS_FN_TYPE, is_blank: bool = 
     p_start, p_end = st.session_state[StreamlitKeys.PRESSURE_SLIDER]
     if not is_blank:
         radii, masses = generate_mass_radius_curve(
-            p_c_magnitude_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
+            p_c_exponent_range=(p_start, p_end), eos_eps_fn=eos_eps_fn
         )
         draw_mr_curve_and_constraints(radii, masses)
     else:

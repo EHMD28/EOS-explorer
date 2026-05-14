@@ -97,9 +97,9 @@ def solve_dimensionless_tov(
     """
     Solve the TOV equation for a given central pressure (`p_c`). The `eos_eps_fn`
     is a callback function which takes in pressure in physical units [MeV/fm^3]
-    and outputs energy density in natural units [MeV/fm^3]. Returns a
-    `TOV_Solutions` object. See `math/Units.md` for more information about
-    internals.
+    and outputs energy density in natural units [MeV/fm^3]. Returns a tuple of
+    the form (radius_km, mass_msol). See `math/Units.md` for more information
+    about internals.
     """
 
     def eos_eps_prime(p_p: float):
@@ -128,17 +128,17 @@ def solve_dimensionless_tov(
 
 
 def generate_mass_radius_curve(
-    p_c_magnitude_range: tuple[float, float],
+    p_c_exponent_range: tuple[float, float],
     eos_eps_fn: EOS_EPS_FN_TYPE,
 ) -> tuple[list[float], list[float]]:
     """
     Solve the TOV equation over a range of central pressures. The solver will be
     run for 100 logarithmically spaced points on the interval 10^`p_start` ->
-    10^`p_end` (where `p_c_magnitude_range` = (`p_start`, `p_end`)) The `eos_eps_fn`
+    10^`p_end` (where `p_c_exponent_range` = (`p_start`, `p_end`)) The `eos_eps_fn`
     is a callback function which takes in pressure in natural units [MeV/fm^3]
     and outputs energy density in natural units [MeV/fm^3].
     """
-    p_start, p_end = p_c_magnitude_range
+    p_start, p_end = p_c_exponent_range
     p_c_values = np.logspace(p_start, p_end, num=100)
     radii = []
     masses = []

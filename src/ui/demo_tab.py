@@ -22,6 +22,7 @@ def draw_tov_equations_info():
 
 
 def draw_relativistic_equations_info():
+    st.markdown("### Natural Units Conversion")
     st.latex(
         r"c = \frac{3.0 \times 10^8 \space \mathrm{meters}}{1 \space \mathrm{second}}"
     )
@@ -33,6 +34,10 @@ def draw_relativistic_equations_info():
     st.latex(
         r"1 \space \mathrm{meters} = \frac{1}{3.0 \times 10^8} \space \mathrm{seconds}"
     )
+    st.text("Consider")
+    st.latex("E = mc^2")
+    st.markdown("If $c = 1$, then")
+    st.latex("E = m")
 
 
 def draw_dimensionless_conversion_info():
