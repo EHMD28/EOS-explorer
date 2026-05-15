@@ -4,10 +4,10 @@
 
 EoS Explorer using a polytrope of the form 
 
-$$ P(\varepsilon) = \Kappa \varepsilon^\gamma $$
+$$ P(\varepsilon) = K \varepsilon^\gamma $$
 
 or alternatively
 
-$$ \varepsilon(P) = \left(\frac{P}{\Kappa} \right)^{1/\gamma} $$
+$$ \varepsilon(P) = \left(\frac{P}{K} \right)^{1/\gamma} $$
 
-Where $P$ represents pressure, $\varepsilon$ represents energy density, and $\Kappa$ and $\gamma$ are constants
+Where $P$ represents pressure, $\varepsilon$ represents energy density, and $K$ and $\gamma$ are constants
